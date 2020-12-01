@@ -154,10 +154,13 @@ if __name__ == '__main__':
         # begin simulation
         initalize(nodes, adj, num_nodes)
         
-        for i in tqdm(range(0, 60)):
+        for i in range(0, 60):
+                print("Iteration#: " + str(i))
                 simulation(nodes, adj, 1)
                 visualization(nodes, adj, i)
+        print("Generation Complete")
+        print("Compiling GIF...")
 
-        generate_gif("./graph")
+        generate_gif("./graph")         # GIF is stored in graph folder
         
 
