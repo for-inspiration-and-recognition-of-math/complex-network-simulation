@@ -98,10 +98,11 @@ def visualization(nodes, adj, index=-1, color_edges=True):
                 # output graph png
                 try:  
                         os.makedirs(path_graph, mode)
-                        os.makedirs(path_csv, mode)
                 except OSError as error:  
-                        #print("Directory Already Exists")   
                         pass
+                try: 
+                        os.makedirs(path_csv, mode)
+                except: pass
                 finally:
                         plt.savefig(path_graph + repr(index) + ".png", format="PNG")
                         dataframe = pd.DataFrame(adj)
@@ -112,13 +113,15 @@ def visualization(nodes, adj, index=-1, color_edges=True):
 
 '''
 func generate_gif
-@param path: directory path to image folder
+@param 
+        input_path: directory path to image folder
+        index (optional): current gif iteration (recommended if more than 1 gif is generated)
 @return none
-@output compiles all images by index into "animated.gif", and outputs gif into @path
+@output compiles all images by index into "animated.gif", and outputs gif into /animation
 Note: only call when all graphs have been generated using func visualization(...)
 '''
-def generate_gif(path):
-        my_path = path
+def generate_gif(input_path, index=1):
+        my_path = input_path
         # basically the python version of regular expression search of list segments
         # you can also use globbing and bash commands, but apparently wildcard symbols can be unstable across different shell versions
         only_PNGs = [os.path.join(my_path, f) for f in os.listdir(my_path) if os.path.isfile(os.path.join(my_path, f)) and f.endswith(".png")]
@@ -135,14 +138,19 @@ def generate_gif(path):
         for filepath in only_PNGs:
                 sizecounter += os.stat(filepath).st_size
 
+        # create output directory
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        path_animation = os.path.join(dir_path + "/animation/")
+        try: os.makedirs(path_animation, 0o755)       # dedicated directory for gifs
+        except: pass
+        
         with tqdm(total=sizecounter, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
-                with imageio.get_writer(os.path.join(my_path, "animated.gif"), mode='I', duration=0.2) as writer:
+                with imageio.get_writer(os.path.join(path_animation, "animated-" + repr(index) + ".gif"), mode='I', duration=0.2) as writer:
                         for pic in only_PNGs:
                                 image = imageio.imread(pic)
                                 writer.append_data(image)
                                 pbar.set_postfix(file=pic, refresh=True)
                                 pbar.update(os.stat(pic).st_size)
-        
 
 if __name__ == '__main__':
         #  defining variables
@@ -161,6 +169,7 @@ if __name__ == '__main__':
         print("Generation Complete")
         print("Compiling GIF...")
 
-        generate_gif("./graph")         # GIF is stored in graph folder
+        generate_gif("./graph/")         # GIF is stored in 'animation' folder
+        print("GIF Generated: stored in 'animation' subdirectory")
         
 
