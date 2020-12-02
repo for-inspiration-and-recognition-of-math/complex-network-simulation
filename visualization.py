@@ -50,7 +50,7 @@ func generate_png_csv
                 if both stubs connect to defecting nodes, edge = red
                 if one stub connects to cooperating node and the other defecting node, edge = yellow
 '''
-def generate_png_csv(nodes, adj, index=-1, color_edges=True):
+def visualization(nodes, adj, index=-1, color_edges=True):
         G = nx.convert_matrix.from_numpy_matrix(adj)
         # green, red (orangish), dark green, yellow, red (leaning magenta)
         color = ['#03b500', '#b52a00', "#005907", "#f5f122", "#db0231"]         

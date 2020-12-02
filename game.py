@@ -41,7 +41,7 @@ if __name__ == '__main__':
         for i in range(0, 60):
                 print("Iteration#: " + str(i))
                 simulation(nodes, adj, 1)
-                generate_png_csv(nodes, adj, i)
+                visualization(nodes, adj, i)
         print("Generation Complete")
         
         generate_gif()         # GIF is stored in 'animation' folder
