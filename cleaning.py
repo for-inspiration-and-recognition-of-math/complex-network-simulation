@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import re
 import random
+from simulations import *
 
 def twitter_random_subgraph( directory, num_subgraphs =100, seed =100):
 	random.seed(seed)
@@ -58,6 +59,18 @@ def generate_random_network(type, num_nodes , p =0.5, m =3, k =3, seed =100):
 		return nx.to_numpy_matrix(graph)
 	else:
 		return "Enter a valid graph type : ER, configuration, BA, or Watts Strogatz"
+
+
+def generate_node_dict(num_nodes,  cooperator_proportion = 0.5, seed =100 ):
+	random.seed( seed)
+	nodes = {}
+    for i in range (0, num_nodes):
+        unif = random.uniform(0, 1)     
+        if unif <= cooperator_proportion:
+        	nodes[i] = Node(0)
+        else:
+        	nodes[i] = Node(1)
+    return nodes
 
 if __name__ == '__main__':
 
