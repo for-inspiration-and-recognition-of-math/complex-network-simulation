@@ -85,20 +85,18 @@ if __name__ == '__main__':
 	twitter_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources/twitter'
 	facebook_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
 	karate_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
-	# print(twitter_random_subgraph(twitter_directory , num_subgraphs =100, seed = 100 ).shape)
-	# print(read_edge_list(facebook_directory, 'facebook_combined.txt').shape)
-
-	# print(read_edge_list(karate_directory, 'soc-karate.txt').shape)
 
 
 	# G = nx.convert_matrix.from_numpy_matrix(read_edge_list(karate_directory, 'soc-karate.txt')) 
 	# G1 = nx.convert_matrix.from_numpy_matrix(read_edge_list(facebook_directory, 'facebook_combined.txt')) 
 	# G2 = nx.convert_matrix.from_numpy_matrix(twitter_random_subgraph(twitter_directory, num_subgraphs = 100, seed = 100))
-	ER = nx.convert_matrix.from_numpy_matrix(generate_random_network('ER',   50, p = 0.2, seed = 100))
+	node_dict, adj_matrix = generate_random_network('ER',   50, p = 1, seed = 100)
+	
+	print(node_dict)
+	print(adj_matrix)
 	#BA = nx.convert_matrix.from_numpy_matrix(generate_random_network('BA', 50, m = 3, seed = 100))
 	#WS = nx.convert_matrix.from_numpy_matrix(generate_random_network('WS', 50, k = 4, p = 0.5, seed = 100))
-	nx.draw(WS)
-	plt.show()
+
 
 
 

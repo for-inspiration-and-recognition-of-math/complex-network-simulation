@@ -9,8 +9,8 @@ dirName = os.path.dirname(__file__)
 
 
 class Node:
-    def __init__(self):
-        self.status = 0 # 0 = cooperate, 1 = defect
+    def __init__(self, status):
+        self.status = status # 0 = cooperate, 1 = defect
         self.wealth = 0
         self.lastPayoff = []
 
@@ -22,7 +22,6 @@ class Node:
         self.status = newStatus
 
     def reset(self, numIterations):
-        self.status = 0 # 0 = cooperate, 1 = defect
         self.wealth = 0
         self.lastPayoff = [0]* numIterations
 
