@@ -9,15 +9,6 @@ import imageio
 import time
 from tqdm import tqdm
 
-
-class Node:
-    def __init__(self, status=0, wealth=0):
-        self.status = status
-        self.history = []
-
-    def update(self, status, wealth):
-        self.status = status
-
 # helper function: create directory if not already exists
 def creat_dir(folder_name):
         dir_path = os.path.dirname(os.path.realpath(__file__))          # NOT os.getcwd() <——> this incantation is faulty
@@ -95,6 +86,12 @@ def visualization(nodes, adj, index=-1, color_edges=True):
         else:               
                 plt.show()
         plt.close()
+
+# use this interface if input is a list of node lists and list of adj matricies
+def visualize_list(nodesDict_list, adjMatrix_list, iterations):
+        print("Generating graphs...")
+        for i in tqdm(range(0, iterations + 1)):
+                visualization(nodesDict_list[i], adjMatrix_list[i], index=i)
 
 '''
 func generate_gif

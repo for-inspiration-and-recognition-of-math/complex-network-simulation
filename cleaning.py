@@ -7,6 +7,10 @@ import re
 import random
 from simulations import Node
 
+twitter_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources/twitter'
+facebook_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
+karate_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
+
 def twitter_random_subgraph( directory, cooperator_proportion= 0.5, num_subgraphs =100, seed =100):
 	random.seed(seed)
 	os.chdir(directory)
@@ -34,7 +38,7 @@ def twitter_random_subgraph( directory, cooperator_proportion= 0.5, num_subgraph
 
 	node_dict = generate_node_dict(G.number_of_nodes, cooperator_proportion, 100 )
 
-	return node_dict, nx.to_numpy_matrix(G)
+	return node_dict, nx.to_numpy_array(G)
 
 
 def read_edge_list(directory,  filename, cooperator_proportion = 0.5 ): #reads in an edgelist and returns the corresponding numpy adjacnecy matrix
@@ -48,7 +52,7 @@ def read_edge_list(directory,  filename, cooperator_proportion = 0.5 ): #reads i
 	for i in range(E):
 		G.add_edge(sources[i], targets[i])
 	node_dict = generate_node_dict(G.number_of_nodes, cooperator_proportion, 100 )
-	return node_dict, nx.to_numpy_matrix(G)
+	return node_dict, nx.to_numpy_array(G)
 
 
 def generate_random_network(type, num_nodes , cooperator_proportion=0.5,  p =0.5, m =3, k =3, seed =100):
@@ -57,13 +61,13 @@ def generate_random_network(type, num_nodes , cooperator_proportion=0.5,  p =0.5
 
 	if type == 'ER':
 		graph = nx.erdos_renyi_graph(num_nodes, p, seed= seed)
-		return node_dict, nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	elif type == 'BA':
 		graph = nx.barabasi_albert_graph(num_nodes, m, seed = seed)
-		return node_dict, nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	elif type == 'WS':
 		graph = nx.watts_strogatz_graph(num_nodes, k, p, seed= seed)
-		return node_dict, nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	else:
 		return "Enter a valid graph type : ER, configuration, BA, or Watts Strogatz"
 
@@ -78,30 +82,3 @@ def generate_node_dict(num_nodes,  cooperator_proportion = 0.5, seed =100 ):
 		else:
 			nodes[i] = Node(1)
 	return nodes
-
-
-if __name__ == '__main__':
-
-	twitter_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources/twitter'
-	facebook_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
-	karate_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
-
-
-	# G = nx.convert_matrix.from_numpy_matrix(read_edge_list(karate_directory, 'soc-karate.txt')) 
-	# G1 = nx.convert_matrix.from_numpy_matrix(read_edge_list(facebook_directory, 'facebook_combined.txt')) 
-	# G2 = nx.convert_matrix.from_numpy_matrix(twitter_random_subgraph(twitter_directory, num_subgraphs = 100, seed = 100))
-	node_dict, adj_matrix = generate_random_network('ER',   50, p = 1, seed = 100)
-	
-	print(node_dict)
-	print(adj_matrix)
-	#BA = nx.convert_matrix.from_numpy_matrix(generate_random_network('BA', 50, m = 3, seed = 100))
-	#WS = nx.convert_matrix.from_numpy_matrix(generate_random_network('WS', 50, k = 4, p = 0.5, seed = 100))
-
-
-
-
-
-
-
-
-# Make the network
