@@ -38,19 +38,16 @@ class Simulation:
 
     def __call__(self, nodesDict, adjMatrix):
         if self.strategy == 0:
-            nodesDict, adjMatrix = self.simulation_simplest(nodesDict, adjMatrix)
-            return nodesDict, adjMatrix
-        elif self.strategy == 1:
-            return self.simulation_type1(nodesDict, adjMatrix)
-        else:
-            return self.simulation_type2(nodesDict, adjMatrix)
+            return self.simulation_simplest(nodesDict, adjMatrix)
+        else
+            return self.simulation_type(nodesDict, adjMatrix, self.strategy)
 
     def simulation_simplest(self, nodesDict, adjMatrix):
         numNodes = len(adjMatrix[0])
         for iter in range(self.numIterations):
             for i in range(0, numNodes):
                 for j in range(0, i):
-                    if adjMatrix[i][j]: # there is an edge
+                    if adjMatrix[i][j] and random.uniform(0, 1) < 0.1: # there is an edge
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
                         if nodesDict[i].status == 1 or nodesDict[j].status == 1:
                             adjMatrix[i][j] = 0
@@ -62,7 +59,7 @@ class Simulation:
 
         return nodesDict, adjMatrix
 
-    def simulation_type1(self, nodesDict, adjMatrix):
+    def simulation_type(self, nodesDict, adjMatrix, type):
         numNodes = len(adjMatrix[0])
         for iter in range(self.numIterations):
             for i in range(0, numNodes):
@@ -97,53 +94,16 @@ class Simulation:
 
                         # Update node classes
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
-                        nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i], iter)
-                        nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j], iter)
-            self.saveOutput(nodesDict, adjMatrix, iter)
-        return nodesDict, adjMatrix
-
-
-    def simulation_type2(self, nodesDict, adjMatrix):
-        [node.reset(self.numIterations) for node in nodesDict.values()]
-        numNodes = len(adjMatrix[0])
-        for iter in range(self.numIterations):
-            for i in range(0, numNodes):
-                for j in range(0, i):
-                    if adjMatrix[i][j]: # there is an edge
-                        # Update edges
-                        if nodesDict[i].status == 1 and nodesDict[j].status == 1:
-                            adjMatrix[i][j] = 0
-                            adjMatrix[j][i] = 0
-                            otherNodes = list(range(numNodes))[:i] + list(range(numNodes))[i+1:]
-                            newNodeToLink = random.choice(otherNodes)
-                            adjMatrix[i][newNodeToLink] = 1
-                            adjMatrix[newNodeToLink][i] = 1
-
-                        elif nodesDict[i].status == 1 or nodesDict[j].status == 1:
-                            adjMatrix[i][j] = 0
-                            adjMatrix[j][i] = 0
-
-                            if nodesDict[i].status == 1: # i defect
-                                otherNodes = list(range(numNodes))[:j] + list(range(numNodes))[j+1:]
-                                newNodeToLink = random.choice(otherNodes)
-                                adjMatrix[j][newNodeToLink] = 1
-                                adjMatrix[newNodeToLink][j] = 1 # j forms a new edge with another node
-                            else:
-                                otherNodes = list(range(numNodes))[:i] + list(range(numNodes))[i+1:]
-                                newNodeToLink = random.choice(otherNodes)
-                                adjMatrix[i][newNodeToLink] = 1
-                                adjMatrix[newNodeToLink][i] = 1 # i forms a new edge with another node
-                        else:
-                            adjMatrix[i][j] = 1
-                            adjMatrix[j][i] = 1
-
-                        # Update node classes
-                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
-                        nodeiNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[i]) if isNeighbor]
-                        nodejNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[j]) if isNeighbor]
-
-                        nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors, iter)
-                        nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors, iter)
+                        
+                        if type == 1:
+                            nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i], iter)
+                            nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j], iter)
+                        
+                        elif type == 2:
+                            nodeiNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[i]) if isNeighbor]
+                            nodejNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[j]) if isNeighbor]
+                            nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors, iter)
+                            nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors, iter)
             self.saveOutput(nodesDict, adjMatrix, iter)
         return nodesDict, adjMatrix
 
