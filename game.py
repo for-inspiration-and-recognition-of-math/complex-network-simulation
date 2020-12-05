@@ -2,6 +2,14 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from visualization import *
+from copy import *
+
+
+class Node:
+    def __init__(self):
+        self.status = 0 # 0 = cooperate, 1 = defect
+        self.wealth = 0
+        self.lastPayoff = []
 
 def initalize(nodes, adj, num_nodes):
         random.seed()
@@ -27,21 +35,34 @@ def simulation(nodes, a, num_iterations):
                                         else:
                                                 adj[i][j] = 1
                                                 adj[j][i] = 1
+        for a in nodes.values():
+                if (random.uniform(0, 1) <= 0.1):       # 20% chance a node just wants to change over
+                        a.status = 0 if a.status==1 else 1
 
 if __name__ == '__main__':
         #  defining variables
-        num_nodes = 100
-        num_iterations = 10
+        num_nodes = 10
+        numIterations = 10
         nodes = {x:Node() for x in range (num_nodes)}
         adj = np.zeros((num_nodes, num_nodes))
 
         # begin simulation
         initalize(nodes, adj, num_nodes)
         
-        for i in range(0, 60):
-                print("Iteration#: " + str(i))
-                simulation(nodes, adj, 1)
-                visualization(nodes, adj, i)
-        print("Generation Complete")
+        nodes_list, adj_list = [], []
+        nodes_list.append(deepcopy(nodes))
+        adj_list.append(np.copy(adj))
         
-        generate_gif()         # GIF is stored in 'animation' folder
+        for i in range(0, numIterations):
+                simulation(nodes, adj, 1)
+                nodes_list.append(deepcopy(nodes))
+                adj_list.append(np.copy(adj))
+                
+                
+        for state in nodes_list:
+                for i in state.values():
+                        print(i.status, end=", ") 
+                print()
+
+
+        visualize_list(nodes_list, adj_list, numIterations, "ER+strat2")        # 4th parameter (model name) is for bookkeeping purposes

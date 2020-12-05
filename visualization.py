@@ -4,19 +4,11 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
+import collections
 import os
 import imageio
 import time
 from tqdm import tqdm
-
-
-class Node:
-    def __init__(self, status=0, wealth=0):
-        self.status = status
-        self.history = []
-
-    def update(self, status, wealth):
-        self.status = status
 
 # helper function: create directory if not already exists
 def creat_dir(folder_name):
@@ -35,6 +27,7 @@ func generate_png_csv
 @param 
         nodes: dictionary of nodes
         adj: adjacency matrix (numpy 2D array)
+        abs_path: absolute path to the subdirectory in which all graphs will be stored (defaults to "graph")
         index (optional): current simulation iteration (needed to generate png, else just oopens for 1 time viewing)
         color_edges (true by default): colors edges depending on the nodes attached
 @return
@@ -50,14 +43,22 @@ func generate_png_csv
                 if both stubs connect to defecting nodes, edge = red
                 if one stub connects to cooperating node and the other defecting node, edge = yellow
 '''
-def visualization(nodes, adj, index=-1, color_edges=True):
+def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histogram, index=-1, color_edges=True):
         G = nx.convert_matrix.from_numpy_matrix(adj)
-        # green, red (orangish), dark green, yellow, red (leaning magenta)
+        # node colors [0,1] : green, red (orangish), 
+        # edge colors [2,3,4] : dark green, yellow, red (leaning magenta)
         color = ['#03b500', '#b52a00', "#005907", "#f5f122", "#db0231"]         
-        nodes_color = [color[1] if (nodes[i].status) else color[0] for i in range (len(nodes))]
+        nodes_color = [color[1] if (nodes[i].status == 1) else color[0] for i in range (len(nodes))]
 
         optimized_pos = nx.spring_layout(G, iterations=20)
         plt.figure(figsize = (10, 10))
+        plt.title("Iteration={0}".format(index))
+        
+        
+        # ---------------------------------------------------------
+        # generating network visualization
+        # ---------------------------------------------------------
+        
         edge_width = 0.1
         edge_alpha = 0.7
         nx.draw(G, optimized_pos, with_labels=False, node_color = nodes_color, node_size = 15, width=edge_width)
@@ -67,10 +68,10 @@ def visualization(nodes, adj, index=-1, color_edges=True):
                 good_good_edges = []
                 bad_bad_edges = []
                 mixed_edges = []
-
+                
                 for i in range (len(adj)):
                         for j in range (len(adj)):
-                                if adj[i][j] == 1:
+                                if adj[i][j] > 0:
                                         if nodes[i].status == 0 and nodes[j].status == 0: good_good_edges.append((i,j))
                                         elif nodes[i].status == 1 and nodes[j].status == 1: bad_bad_edges.append((i,j))
                                         else: mixed_edges.append((i,j))
@@ -85,16 +86,88 @@ def visualization(nodes, adj, index=-1, color_edges=True):
                         edgelist=bad_bad_edges,
                         width=edge_width,alpha=edge_alpha,edge_color=color[4])
         
-        # creating file directories and outputting graphs as PNGs
-        path_graph, path_csv = creat_dir("graph"), creat_dir("csv")
-        if index != -1:
-                # output graph png
-                plt.savefig(path_graph + repr(index) + ".png", format="PNG")
-                dataframe = pd.DataFrame(adj)
-                dataframe.to_csv(path_csv + repr(index) + ".csv")
-        else:               
-                plt.show()
+        # saving network graphs and histograms as PNGs in separate folders
+        if index != -1: plt.savefig(path_network + "net-" + repr(index) + ".png", format="PNG")      # output graph png 
+        else: plt.show()
         plt.close()
+        
+        
+        # ---------------------------------------------------------
+        # plotting degree distribution histogram
+        # ---------------------------------------------------------
+        
+        # 1. edge histogram
+
+        heights = [len(good_good_edges), len(mixed_edges), len(bad_bad_edges)]
+        edge_types = ("good-good", "mixed", "bad-bad")
+        
+        bar_spacing = np.arange(len(edge_types))
+        plt.bar(bar_spacing, heights, width=0.80, color=[color[2], color[3], color[4]])    # generate the histogram
+        
+        # setting attributes of bar graph
+        plt.title("Edge Type Distribution (iter={0})".format(index))
+        plt.ylabel("Number of Edges")
+        plt.xlabel("Edge Type")
+        
+        plt.xticks(bar_spacing, edge_types)
+        
+        if index != -1: plt.savefig(path_edge_histogram + "edge-" + repr(index) + ".png", format="PNG")      # output graph png 
+        else: plt.show()
+        plt.close()
+        
+        
+        # 2. node histogram
+        good_nodes_count, bad_nodes_count = 0, 0
+        for col in nodes_color:
+                if col == color[0]: good_nodes_count += 1
+                elif col == color[1]: bad_nodes_count += 1
+        
+        heights = [good_nodes_count, bad_nodes_count]
+        edge_types = ("Cooperator", "Defector")
+        
+        bar_spacing = np.arange(len(edge_types))
+        plt.bar(bar_spacing, heights, width=0.80, color=[color[0], color[1]])    # generate the histogram
+        
+        # setting attributes of bar graph
+        plt.title("Node Type Distribution (iter={0})".format(index))
+        plt.ylabel("Number of Nodes")
+        plt.xlabel("Node Type")
+        
+        plt.xticks(bar_spacing, edge_types)
+        
+        if index != -1: plt.savefig(path_node_histogram + "/" +"node-" + repr(index) + ".png", format="PNG")      # output graph png 
+        else: plt.show()
+        plt.close()
+        
+        
+        #enable method chaining
+        return G        
+
+'''
+# INTERFACE: 
+# if input is a list of node lists and list of adj matricies, 
+# outputs graph given folder_name and generates gif
+'''
+def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name):
+        print("Generating graphs...")
+        # create directories and generate correct absolute path name
+        path_network, path_node_histogram, path_edge_histogram, path_animation = creat_dir(model_name + " (network)"), creat_dir(model_name + " (node-histogram)"), creat_dir(model_name + " (edge-histogram)"), creat_dir("animation")
+        
+        # cleans directory containing the network and histogram visualizations
+        for model_path in [path_network, path_node_histogram, path_edge_histogram]:
+                for root, dirs, files in os.walk(model_path, onerror=lambda err: print("OSwalk error: " + repr(err))):
+                        for file in files:
+                                os.remove(os.path.join(root, file))
+        
+        # create graphs
+        for i in tqdm(range(0, iterations + 1)):
+                visualization(nodesDict_list[i], adjMatrix_list[i], path_network, path_node_histogram, path_edge_histogram, i)
+        
+        # compile PNGs into gif (for both network and histogram)
+        generate_gif(model_name + " (network)", path_network, path_animation)
+        generate_gif(model_name + " (edge-histogram)", path_edge_histogram, path_animation)
+        generate_gif(model_name + " (node-histogram)", path_node_histogram, path_animation)
+
 
 '''
 func generate_gif
@@ -105,7 +178,7 @@ func generate_gif
 @output compiles all images by index into "animated.gif", and outputs gif into /animation
 Note: only call when all graphs have been generated using func visualization(...)
 '''
-def generate_gif(input_path="./graph/", index=1):
+def generate_gif(model_name, input_path, output_path):
         print("Compiling GIF...")
         my_path = input_path
         # basically the python version of regular expression search of list segments
@@ -124,13 +197,12 @@ def generate_gif(input_path="./graph/", index=1):
         for filepath in only_PNGs:
                 sizecounter += os.stat(filepath).st_size
         
-        path_animation = creat_dir("animation")
         with tqdm(total=sizecounter, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
-                with imageio.get_writer(os.path.join(path_animation, "animated-" + repr(index) + ".gif"), mode='I', duration=0.2) as writer:
+                with imageio.get_writer(os.path.join(output_path, model_name + "-animated.gif"), mode='I', duration=0.2) as writer:
                         for pic in only_PNGs:
                                 image = imageio.imread(pic)
                                 writer.append_data(image)
-                                pbar.set_postfix(file=pic, refresh=True)
+                                pbar.set_postfix(file=os.path.basename(pic), refresh=True)             # does NOT work on a POSIX system to get the base name from a Windows styled path
                                 pbar.update(os.stat(pic).st_size)
-        print("GIF Generated: stored in 'animation' subdirectory")
+        print("GIF Generated: stored in {0}".format(output_path))
         

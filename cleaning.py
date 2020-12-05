@@ -5,8 +5,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import re
 import random
+from simulations import Node
 
-def twitter_random_subgraph( directory, num_subgraphs =100, seed =100):
+twitter_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources/twitter'
+facebook_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
+karate_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
+
+def twitter_random_subgraph( directory, cooperator_proportion= 0.5, num_subgraphs =100, seed =100):
 	random.seed(seed)
 	os.chdir(directory)
 	subgraph_names = os.listdir(directory)
@@ -30,10 +35,13 @@ def twitter_random_subgraph( directory, num_subgraphs =100, seed =100):
 	E = len(sources)    # Number of edges
 	for i in range(E):
 		G.add_edge(sources[i], targets[i])
-	return nx.to_numpy_matrix(G)
+
+	node_dict = generate_node_dict(G.number_of_nodes, cooperator_proportion, 100 )
+
+	return node_dict, nx.to_numpy_array(G)
 
 
-def read_edge_list(directory, filename ): #reads in an edgelist and returns the corresponding numpy adjacnecy matrix
+def read_edge_list(directory,  filename, cooperator_proportion = 0.5 ): #reads in an edgelist and returns the corresponding numpy adjacnecy matrix
 	os.chdir(directory)
 	network1 = open(filename, 'r')
 	network1 = network1.read().splitlines()
@@ -43,46 +51,34 @@ def read_edge_list(directory, filename ): #reads in an edgelist and returns the 
 	E = len(sources)    # Number of edges
 	for i in range(E):
 		G.add_edge(sources[i], targets[i])
-	return nx.to_numpy_matrix(G)
+	node_dict = generate_node_dict(G.number_of_nodes, cooperator_proportion, 100 )
+	return node_dict, nx.to_numpy_array(G)
 
-def generate_random_network(type, num_nodes , p =0.5, m =3, k =3, seed =100):
+
+def generate_random_network(type, num_nodes , cooperator_proportion=0.5,  p =0.5, m =3, k =3, seed =100):
 	#Enter type of graph and corresponding parameters and returns randomly generated graph's numpy adjacency matrix
+	node_dict = generate_node_dict(num_nodes, cooperator_proportion, 100 )
+
 	if type == 'ER':
 		graph = nx.erdos_renyi_graph(num_nodes, p, seed= seed)
-		return nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	elif type == 'BA':
 		graph = nx.barabasi_albert_graph(num_nodes, m, seed = seed)
-		return nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	elif type == 'WS':
 		graph = nx.watts_strogatz_graph(num_nodes, k, p, seed= seed)
-		return nx.to_numpy_matrix(graph)
+		return node_dict, nx.to_numpy_array(graph)
 	else:
 		return "Enter a valid graph type : ER, configuration, BA, or Watts Strogatz"
 
-if __name__ == '__main__':
 
-	twitter_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources/twitter'
-	facebook_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
-	karate_directory = '/Users/louiszhao/Documents/GitHub/M168-simulation/resources'
-	# print(twitter_random_subgraph(twitter_directory , num_subgraphs =100, seed = 100 ).shape)
-	# print(read_edge_list(facebook_directory, 'facebook_combined.txt').shape)
-
-	# print(read_edge_list(karate_directory, 'soc-karate.txt').shape)
-
-
-	# G = nx.convert_matrix.from_numpy_matrix(read_edge_list(karate_directory, 'soc-karate.txt')) 
-	# G1 = nx.convert_matrix.from_numpy_matrix(read_edge_list(facebook_directory, 'facebook_combined.txt')) 
-	# G2 = nx.convert_matrix.from_numpy_matrix(twitter_random_subgraph(twitter_directory, num_subgraphs = 100, seed = 100))
-	ER = nx.convert_matrix.from_numpy_matrix(generate_random_network('ER', 50, p = 0.2, seed = 100))
-	BA = nx.convert_matrix.from_numpy_matrix(generate_random_network('BA', 50, m = 3, seed = 100))
-	WS = nx.convert_matrix.from_numpy_matrix(generate_random_network('WS', 50, k = 4, p = 0.5, seed = 100))
-	nx.draw(WS)
-	plt.show()
-
-
-
-
-
-
-
-# Make the network
+def generate_node_dict(num_nodes,  cooperator_proportion = 0.5, seed =100 ):
+	random.seed( seed)
+	nodes = {}
+	for i in range (0, num_nodes):
+		unif = random.uniform(0, 1)
+		if unif <= cooperator_proportion:
+			nodes[i] = Node(0)
+		else:
+			nodes[i] = Node(1)
+	return nodes
