@@ -3,6 +3,10 @@ graph/
 csv/
 animation/
 savedInfo/
+ER+strat2 (edge-histogram)/
+ER+strat2 (network)/
+ER+strat2 (node-histogram)/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -6,25 +6,25 @@ from visualization import *
 
 if __name__ == '__main__':
         num_nodes = 50
-        numIterations = 100
+        numIterations = 50
         
         # gneerate network
-        nodes, adj = generate_random_network("ER", num_nodes, p=0.8)
+        nodes, adj = generate_random_network("ER", num_nodes, p=0.6)
         
 
         
         # run simulation
         saveRate = 1
-        simulation_simplest = Simulation(numIterations, saveRate, strategy= 2) # choose from 0, 1, 2
+        simulation = Simulation(numIterations, saveRate, strategy= 2) # choose from 0, 1, 2
         
         
-        nodes_list, adj_list = simulation_simplest(nodes, adj)
+        nodes_list, adj_list = simulation(nodes, adj)
 
         
         # visualize
         
-        visualize_list(nodes_list, adj_list, numIterations)
-        generate_gif()
+        visualize_list(nodes_list, adj_list, numIterations, "ER+strat2")        # 4th parameter (model name) is for bookkeeping purposes
+        
 
         
 

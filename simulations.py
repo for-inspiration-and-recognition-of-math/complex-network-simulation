@@ -3,6 +3,7 @@ import pandas as pd
 import random
 import csv
 import os
+from copy import *
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 dirName = os.path.dirname(__file__)
@@ -61,8 +62,8 @@ class Simulation:
         return nodesDict, adjMatrix
 
     def simulation_type(self, nodesDict, adjMatrix, type):
-        nodesDict_list.append(nodesDict)
-        adjMatrix_list.append(adjMatrix)    # adding initial structure
+        nodesDict_list.append(deepcopy(nodesDict))
+        adjMatrix_list.append(np.copy(adjMatrix))    # adding initial structure
         numNodes = len(adjMatrix[0])
         for iter in range(self.numIterations):
             for i in range(0, numNodes):
@@ -109,8 +110,8 @@ class Simulation:
                             nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors, iter)
                             nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors, iter)
             self.saveOutput(nodesDict, adjMatrix, iter)
-            nodesDict_list.append(nodesDict)
-            adjMatrix_list.append(adjMatrix)
+            nodesDict_list.append(deepcopy(nodesDict))
+            adjMatrix_list.append(np.copy(adjMatrix))
         return nodesDict_list, adjMatrix_list
 
     def updateNodesStatusBasedOnAvgPayoff(self, node, neighborsList, iter):
@@ -134,9 +135,9 @@ class Simulation:
         if status1 == 0 and status2 == 0: # both cooperate
             return 2, 2
         elif status1 == 0 and status2 == 1:
-            return -1, 2
+            return -1, 1
         elif status1 == 1 and status2 == 0:
-            return 2, -1
+            return 1, -1
         else:
             return 0, 0
 
