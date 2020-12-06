@@ -5,6 +5,7 @@ import csv
 import os
 import pickle
 from copy import deepcopy
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 dirName = os.path.dirname(__file__)
@@ -211,9 +212,9 @@ class Simulation:
         if status1 == 0 and status2 == 0: # both cooperate
             return 1, 1
         elif status1 == 0 and status2 == 1:
-            return -1, 2
+            return -1, 1
         elif status1 == 1 and status2 == 0:
-            return 2, -1
+            return 1, -1
         else:
             return -1, -1
 
