@@ -3,10 +3,12 @@ graph/
 csv/
 animation/
 savedInfo/
+
 ER+strat2 (edge-histogram)/
 ER+strat2 (network)/
 ER+strat2 (node-histogram)/
-
+.DS_Store
+.idea/workspace.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
