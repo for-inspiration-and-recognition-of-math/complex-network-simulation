@@ -10,6 +10,37 @@ import imageio
 import time
 from tqdm import tqdm
 
+
+'''
+# INTERFACE: 
+# if input is a list of node lists and list of adj matricies, 
+# outputs graph given folder_name and generates gif
+# 4th parameter (model name) is for bookkeeping purposes
+# 5th parameter (defaulted to True) means position is LOCKED for future iteration 
+# choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
+'''
+def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_lock=True):
+        print("Generating graphs...")
+        # create directories and generate correct absolute path name
+        path_network, path_node_histogram, path_edge_histogram, path_animation = creat_dir(model_name + " (network)"), creat_dir(model_name + " (node-histogram)"), creat_dir(model_name + " (edge-histogram)"), creat_dir("animation")
+        
+        # cleans directory containing the network and histogram visualizations
+        for model_path in [path_network, path_node_histogram, path_edge_histogram]:
+                for root, dirs, files in os.walk(model_path, onerror=lambda err: print("OSwalk error: " + repr(err))):
+                        for file in files:
+                                os.remove(os.path.join(root, file))
+        
+        # create graphs
+        
+        for i in tqdm(range(0, iterations + 1)):
+                visualization(nodesDict_list[i], adjMatrix_list[i], path_network, path_node_histogram, path_edge_histogram, i, pos_lock)
+        
+        # compile PNGs into gif (for both network and histogram)
+        generate_gif(model_name + " (network)", path_network, path_animation)
+        generate_gif(model_name + " (edge-histogram)", path_edge_histogram, path_animation)
+        generate_gif(model_name + " (node-histogram)", path_node_histogram, path_animation)
+
+
 # helper function: create directory if not already exists
 def creat_dir(folder_name):
         dir_path = os.path.dirname(os.path.realpath(__file__))          # NOT os.getcwd() <——> this incantation is faulty
@@ -43,15 +74,25 @@ func generate_png_csv
                 if both stubs connect to defecting nodes, edge = red
                 if one stub connects to cooperating node and the other defecting node, edge = yellow
 '''
-def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histogram, index=-1, color_edges=True):
+optimized_pos, position_lock = False, False            #setting position variables
+def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histogram, index=-1, pos_lock = True, color_edges=True):
         G = nx.convert_matrix.from_numpy_matrix(adj)
         # node colors [0,1] : green, red (orangish), 
         # edge colors [2,3,4] : dark green, yellow, red (leaning magenta)
         color = ['#03b500', '#b52a00', "#005907", "#f5f122", "#db0231"]         
         nodes_color = [color[1] if (nodes[i].status == 1) else color[0] for i in range (len(nodes))]
 
-        # nx.spring_layout(G, iterations=20)
-        optimized_pos = nx.bipartite_layout(G, nodes)
+        # node positioning
+        if pos_lock:
+                global optimized_pos, position_lock
+                if not position_lock:
+                        optimized_pos = nx.spring_layout(G)
+                        position_lock = True
+        else: optimized_pos = nx.spring_layout(G)  
+        # optimized_pos = nx.shell_layout(G)
+        # optimized_pos = nx.spiral_layout(G)
+        # optimized_pos = nx.spectral_layout(G)
+        
         plt.figure(figsize = (10, 10))
         plt.title("Iteration={0}".format(index))
         
@@ -111,6 +152,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         plt.xlabel("Edge Type")
         
         plt.xticks(bar_spacing, edge_types)
+        plt.ylim([0, len(good_good_edges) + len(bad_bad_edges) + len(mixed_edges)])
+        plt.grid(True, axis='y')
         
         if index != -1: plt.savefig(path_edge_histogram + "edge-" + repr(index) + ".png", format="PNG")      # output graph png 
         else: plt.show()
@@ -135,6 +178,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         plt.xlabel("Node Type")
         
         plt.xticks(bar_spacing, edge_types)
+        plt.ylim([0, len(nodes_color)])
+        plt.grid(True, axis='y')
         
         if index != -1: plt.savefig(path_node_histogram + "/" +"node-" + repr(index) + ".png", format="PNG")      # output graph png 
         else: plt.show()
@@ -143,31 +188,6 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         
         #enable method chaining
         return G        
-
-'''
-# INTERFACE: 
-# if input is a list of node lists and list of adj matricies, 
-# outputs graph given folder_name and generates gif
-'''
-def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name):
-        print("Generating graphs...")
-        # create directories and generate correct absolute path name
-        path_network, path_node_histogram, path_edge_histogram, path_animation = creat_dir(model_name + " (network)"), creat_dir(model_name + " (node-histogram)"), creat_dir(model_name + " (edge-histogram)"), creat_dir("animation")
-        
-        # cleans directory containing the network and histogram visualizations
-        for model_path in [path_network, path_node_histogram, path_edge_histogram]:
-                for root, dirs, files in os.walk(model_path, onerror=lambda err: print("OSwalk error: " + repr(err))):
-                        for file in files:
-                                os.remove(os.path.join(root, file))
-        
-        # create graphs
-        for i in tqdm(range(0, iterations + 1)):
-                visualization(nodesDict_list[i], adjMatrix_list[i], path_network, path_node_histogram, path_edge_histogram, i)
-        
-        # compile PNGs into gif (for both network and histogram)
-        generate_gif(model_name + " (network)", path_network, path_animation)
-        generate_gif(model_name + " (edge-histogram)", path_edge_histogram, path_animation)
-        generate_gif(model_name + " (node-histogram)", path_node_histogram, path_animation)
 
 
 '''
@@ -199,7 +219,7 @@ def generate_gif(model_name, input_path, output_path):
                 sizecounter += os.stat(filepath).st_size
         
         with tqdm(total=sizecounter, unit='B', unit_scale=True, unit_divisor=1024) as pbar:
-                with imageio.get_writer(os.path.join(output_path, model_name + "-animated.gif"), mode='I', duration=0.2) as writer:
+                with imageio.get_writer(os.path.join(output_path, model_name + "-animated.gif"), mode='I', duration=0.3) as writer:
                         for pic in only_PNGs:
                                 image = imageio.imread(pic)
                                 writer.append_data(image)
