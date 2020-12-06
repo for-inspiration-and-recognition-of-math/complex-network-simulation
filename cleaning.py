@@ -99,10 +99,5 @@ def generate_node_dict(num_nodes,  cooperator_proportion = 0.5, seed =100 ):
 			nodes[i] = Node(1)
 	return nodes
 
-
-if __name__ == '__main__':
-	
-	a, b = generate_random_network('ER' ,50, p =0.1)
-	print(a,b)
 	
 
