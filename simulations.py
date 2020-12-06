@@ -3,11 +3,14 @@ import pandas as pd
 import random
 import csv
 import os
+import pickle
+from copy import deepcopy
+from tqdm import tqdm
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 dirName = os.path.dirname(__file__)
 
-nodesDict_list, adjMatrix_list = [], []
 
 class Node:
     def __init__(self, status):
@@ -21,11 +24,6 @@ class Node:
 
     def updateStatus(self, newStatus):
         self.status = newStatus
-
-    def reset(self, numIterations):
-        self.wealth = 0
-        self.lastPayoff = [0]* numIterations
-
 
 
 class Simulation:
@@ -41,30 +39,107 @@ class Simulation:
         if self.strategy == 0:
             return self.simulation_simplest(nodesDict, adjMatrix)
         else:
-            return self.simulation_type(nodesDict, adjMatrix, self.strategy)
+            return self.simulation_unweighted(nodesDict, adjMatrix, self.strategy)
 
-    def simulation_simplest(self, nodesDict, adjMatrix):
+    def simulation_simplest(self, nodesDict, adjMatrix, pInteract = .1):
+        nodesDict_list, adjMatrix_list = [], []
+        nodesDict_list.append(nodesDict)
+        adjMatrix_list.append(adjMatrix)
+
         numNodes = len(adjMatrix[0])
         for iter in range(self.numIterations):
+            adjMatrix = deepcopy(adjMatrix_list[-1])
+            nodesDict = deepcopy(nodesDict_list[-1])
+
             for i in range(0, numNodes):
                 for j in range(0, i):
-                    if adjMatrix[i][j] and random.uniform(0, 1) < 0.1: # there is an edge
+                    if adjMatrix[i][j] and random.uniform(0, 1) < pInteract: # there is an edge then interact with prob = p
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
                         if nodesDict[i].status == 1 or nodesDict[j].status == 1:
                             adjMatrix[i][j] = 0
                             adjMatrix[j][i] = 0
+                            print('changed')
                         else:
                             adjMatrix[i][j] = 1
                             adjMatrix[j][i] = 1
-            self.saveOutput(nodesDict, adjMatrix, iter)
 
-        return nodesDict, adjMatrix
+            nodesDict_list.append(nodesDict)
+            adjMatrix_list.append(adjMatrix)
 
-    def simulation_type(self, nodesDict, adjMatrix, type):
+        return nodesDict_list, adjMatrix_list
+
+    def linkToNewNode(self, adjMatrix, nodeID, excludingNodesID):
+        otherNodesID = [otherNodeID for otherNodeID, isNeighbor in enumerate(adjMatrix[nodeID])
+                        if not isNeighbor and otherNodeID not in excludingNodesID]
+        if len(otherNodesID) == 0:
+            return adjMatrix
+
+        newNodeToLink = random.choice(otherNodesID)
+        adjMatrix[nodeID][newNodeToLink] = 1
+        adjMatrix[newNodeToLink][nodeID] = 1
+        return adjMatrix
+
+    def simulation_unweighted(self, nodesDict, adjMatrix, type):
+        nodesDict_list, adjMatrix_list = [], []
+        nodesDict_list.append(nodesDict)
+        adjMatrix_list.append(adjMatrix)  # adding initial structure
+        numNodes = len(adjMatrix[0])
+
+        for iterID in tqdm(range(self.numIterations)):
+            adjMatrix = deepcopy(adjMatrix_list[-1])
+            nodesDict = deepcopy(nodesDict_list[-1])
+
+            for i in range(0, numNodes):
+                for j in range(0, i):
+                    if adjMatrix[i][j]:  # there is an edge
+                        # Update edges
+                        if nodesDict[i].status == 1 and nodesDict[j].status == 1:
+                            adjMatrix[i][j] = 0
+                            adjMatrix[j][i] = 0
+                            excludingNodesID = [i, j]
+                            adjMatrix = self.linkToNewNode(adjMatrix, i, excludingNodesID)
+
+                        elif nodesDict[i].status == 1 or nodesDict[j].status == 1:
+                            adjMatrix[i][j] = 0
+                            adjMatrix[j][i] = 0
+                            excludingNodesID = [i, j]
+
+                            adjMatrix = self.linkToNewNode(adjMatrix, j, excludingNodesID) if nodesDict[i].status == 1 \
+                                else self.linkToNewNode(adjMatrix, i, excludingNodesID)
+
+                        else:
+                            pass
+
+                        # Update node classes
+                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
+
+                        if type == 1:
+                            nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i])
+                            nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j])
+
+                        elif type == 2:
+                            nodeiNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[i]) if isNeighbor]
+                            nodejNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[j]) if isNeighbor]
+                            nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors)
+                            nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors)
+
+            nodesDict_list.append(nodesDict)
+            adjMatrix_list.append(adjMatrix)
+
+        self.saveOutput(nodesDict_list, adjMatrix_list)
+        return nodesDict_list, adjMatrix_list
+
+
+    def simulation_unweighted_withMultiEdge(self, nodesDict, adjMatrix, type):
+        nodesDict_list, adjMatrix_list = [], []
         nodesDict_list.append(nodesDict)
         adjMatrix_list.append(adjMatrix)    # adding initial structure
         numNodes = len(adjMatrix[0])
-        for iter in range(self.numIterations):
+
+        for iterID in range(self.numIterations):
+            adjMatrix = deepcopy(adjMatrix_list[-1])
+            nodesDict = deepcopy(nodesDict_list[-1])
+
             for i in range(0, numNodes):
                 for j in range(0, i):
                     if adjMatrix[i][j]: # there is an edge
@@ -100,20 +175,24 @@ class Simulation:
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
                         
                         if type == 1:
-                            nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i], iter)
-                            nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j], iter)
+                            nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i])
+                            nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j])
                         
                         elif type == 2:
                             nodeiNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[i]) if isNeighbor]
                             nodejNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[j]) if isNeighbor]
-                            nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors, iter)
-                            nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors, iter)
-            self.saveOutput(nodesDict, adjMatrix, iter)
-            nodesDict_list.append(nodesDict)
-            adjMatrix_list.append(adjMatrix)
+                            nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors)
+                            nodesDict[j] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[j], nodejNeighbors)
+
+            if iterID % self.saveRate == 0 or iterID == (self.numIterations - 1):
+                nodesDict_list.append(nodesDict)
+                adjMatrix_list.append(adjMatrix)
+
+            self.saveOutput(nodesDict_list, adjMatrix_list)
+
         return nodesDict_list, adjMatrix_list
 
-    def updateNodesStatusBasedOnAvgPayoff(self, node, neighborsList, iter):
+    def updateNodesStatusBasedOnAvgPayoff(self, node, neighborsList):
         neighborsLastPayoff = [neighbor.lastPayoff[-1] for neighbor in neighborsList if (len(neighbor.lastPayoff) > 0)]
         mean = np.mean(neighborsLastPayoff) if len(neighborsLastPayoff) > 0 else 0
         if node.lastPayoff[-1] < mean:
@@ -121,8 +200,8 @@ class Simulation:
             node.updateStatus(newStatus)
         return node
 
-    def updateNodesStatusBasedOnLastPayoff(self, node, iter):
-        if not (iter):
+    def updateNodesStatusBasedOnLastPayoff(self, node):
+        if len(node.lastPayoff) <= 2:
             return node
 
         if node.lastPayoff[-1] < node.lastPayoff[-2]:
@@ -134,11 +213,11 @@ class Simulation:
         if status1 == 0 and status2 == 0: # both cooperate
             return 2, 2
         elif status1 == 0 and status2 == 1:
-            return -1, 2
+            return -1, 1
         elif status1 == 1 and status2 == 0:
-            return 2, -1
+            return 1, -1
         else:
-            return 0, 0
+            return -1, -1
 
     def updateWithGamePayoff(self, node1, node2):
         newPayoff1, newPayoff2 = self.gamePayoff(node1.status, node2.status)
@@ -146,23 +225,34 @@ class Simulation:
         node2.updatePayoff(newPayoff2)
         return node1, node2
 
-    def saveOutput(self, nodesList, adjMatrix, iter):
-        if iter % self.saveRate != 0 and iter!= self.numIterations - 1:
-            return
+    def saveIndividualOutputToCsv(self, nodesDictList, adjMatrixList):
+        numNodes = len(adjMatrixList[0][0])
+        saveRoundTot = len(adjMatrixList)
+        for saveRound, nodeDict, adjMatrix in zip(range(saveRoundTot), nodesDictList, adjMatrixList):
+            iterID = saveRound* self.saveRate
+            nodesInfo = [{'NodeID': nodeID, 'Status': nodeDict[nodeID].status, 'Wealth': nodeDict[nodeID].wealth,
+                          'LastPayoff': nodeDict[nodeID].lastPayoff} for nodeID in range(numNodes)]
+            field_names = ['NodeID', 'Status', 'Wealth', 'LastPayoff']
+            nodeFileName = 'nodeClassInfo_strategy{}_round{}.csv'.format(str(self.strategy), str(iterID))
 
-        # save Nodes Info
-        nodesInfo = [{'NodeID': nodeID, 'Status': nodesList[nodeID].status, 'Wealth': nodesList[nodeID].wealth,
-                      'LastPayoff': nodesList[nodeID].lastPayoff} for nodeID in range(len(nodesList))]
-        field_names = ['NodeID', 'Status', 'Wealth', 'LastPayoff']
+            with open(os.path.join(self.savePath, nodeFileName), 'w') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=field_names)
+                writer.writeheader()
+                writer.writerows(nodesInfo)
 
-        nodeFileName = 'nodeClassInfo_strategy{}_round{}.csv'.format(str(self.strategy), str(iter))
-        with open(os.path.join(self.savePath, nodeFileName), 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=field_names)
-            writer.writeheader()
-            writer.writerows(nodesInfo)
+            # save Adj mat Info
+            adjFileName = 'adjMatrix_strategy{}_round{}.csv'.format(str(self.strategy), str(iterID))
+            pd.DataFrame(adjMatrix).to_csv(os.path.join(self.savePath, adjFileName))
 
-        # save Adj mat Info
-        adjFileName = 'adjMatrix_strategy{}_round{}.csv'.format(str(self.strategy), str(iter))
-        pd.DataFrame(adjMatrix).to_csv(os.path.join(self.savePath, adjFileName))
+    def saveOutput(self, nodesDict_list, adjMatrix_list):
+        # save nodes dict
+        path = os.path.join(self.savePath, 'nodesDict_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        pklFile = open(path, "wb")
+        pickle.dump(nodesDict_list, pklFile)
+        pklFile.close()
 
-        return
+        # save adjmatrix
+        path = os.path.join(self.savePath, 'adjMat_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        pklFile = open(path, "wb")
+        pickle.dump(adjMatrix_list, pklFile)
+        pklFile.close()
