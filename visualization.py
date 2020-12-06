@@ -50,7 +50,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         color = ['#03b500', '#b52a00', "#005907", "#f5f122", "#db0231"]         
         nodes_color = [color[1] if (nodes[i].status == 1) else color[0] for i in range (len(nodes))]
 
-        optimized_pos = nx.spring_layout(G, iterations=20)
+        # nx.spring_layout(G, iterations=20)
+        optimized_pos = nx.bipartite_layout(G, nodes)
         plt.figure(figsize = (10, 10))
         plt.title("Iteration={0}".format(index))
         

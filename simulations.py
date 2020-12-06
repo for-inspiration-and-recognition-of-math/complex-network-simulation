@@ -5,6 +5,7 @@ import csv
 import os
 import pickle
 from copy import deepcopy
+from tqdm import tqdm
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -84,7 +85,7 @@ class Simulation:
         adjMatrix_list.append(adjMatrix)  # adding initial structure
         numNodes = len(adjMatrix[0])
 
-        for iterID in range(self.numIterations):
+        for iterID in tqdm(range(self.numIterations)):
             adjMatrix = deepcopy(adjMatrix_list[-1])
             nodesDict = deepcopy(nodesDict_list[-1])
 
@@ -210,7 +211,7 @@ class Simulation:
 
     def gamePayoff(self, status1, status2):
         if status1 == 0 and status2 == 0: # both cooperate
-            return 1, 1
+            return 2, 2
         elif status1 == 0 and status2 == 1:
             return -1, 1
         elif status1 == 1 and status2 == 0:
