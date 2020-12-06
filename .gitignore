@@ -3,6 +3,8 @@ graph/
 csv/
 animation/
 savedInfo/
+.DS_Store
+.idea/workspace.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
