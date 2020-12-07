@@ -11,6 +11,40 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 dirName = os.path.dirname(__file__)
 
+class CalcPayoff:
+    def __init__(self, payoffID):
+        self.payoffID = payoffID
+
+    def __call__(self, status1, status2):
+        if self.payoffID == 0:
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 2, 2
+            elif status1 == 0 and status2 == 1:
+                return -1, 1
+            elif status1 == 1 and status2 == 0:
+                return 1, -1
+            else:
+                return -1, -1
+
+        elif self.payoffID == 1:
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 1, 1
+            elif status1 == 0 and status2 == 1:
+                return -1, 1
+            elif status1 == 1 and status2 == 0:
+                return 1, -1
+            else:
+                return -1, -1
+
+        else:
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 0, 0
+            elif status1 == 0 and status2 == 1:
+                return -1, 1
+            elif status1 == 1 and status2 == 0:
+                return 1, -1
+            else:
+                return -1, -1
 
 class Node:
     def __init__(self, status):
@@ -27,9 +61,11 @@ class Node:
 
 
 class Simulation:
-    def __init__(self, numIterations, saveRate, strategy):
+    def __init__(self, numIterations, saveRate, strategy, payoffID):
         self.strategy = strategy
         self.numIterations = numIterations
+        self.payoffID = payoffID
+        self.calcPayoff = CalcPayoff(payoffID)
         self.saveRate = saveRate
         self.savePath = os.path.join(dirName, 'savedInfo')
         if not os.path.exists(self.savePath):
@@ -209,18 +245,8 @@ class Simulation:
             node.updateStatus(newStatus)
         return node
 
-    def gamePayoff(self, status1, status2):
-        if status1 == 0 and status2 == 0: # both cooperate
-            return 2, 2
-        elif status1 == 0 and status2 == 1:
-            return -1, 1
-        elif status1 == 1 and status2 == 0:
-            return 1, -1
-        else:
-            return -1, -1
-
     def updateWithGamePayoff(self, node1, node2):
-        newPayoff1, newPayoff2 = self.gamePayoff(node1.status, node2.status)
+        newPayoff1, newPayoff2 = self.calcPayoff(node1.status, node2.status)
         node1.updatePayoff(newPayoff1)
         node2.updatePayoff(newPayoff2)
         return node1, node2
@@ -246,13 +272,13 @@ class Simulation:
 
     def saveOutput(self, nodesDict_list, adjMatrix_list):
         # save nodes dict
-        path = os.path.join(self.savePath, 'nodesDict_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        path = os.path.join(self.savePath, 'nodesDict_strategy{}payoff{}saveRate{}.pickle'.format(self.strategy, self.payoffID, self.saveRate))
         pklFile = open(path, "wb")
         pickle.dump(nodesDict_list, pklFile)
         pklFile.close()
 
         # save adjmatrix
-        path = os.path.join(self.savePath, 'adjMat_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        path = os.path.join(self.savePath, 'adjMat_strategy{}payoff{}saveRate{}.pickle'.format(self.strategy, self.payoffID, self.saveRate))
         pklFile = open(path, "wb")
         pickle.dump(adjMatrix_list, pklFile)
         pklFile.close()

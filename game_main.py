@@ -67,7 +67,9 @@ def complexity_graph():
                 plt.legend()
                 plt.show()             
                 plt.close()
-                
+
+
+
 
 if __name__ == '__main__':
 
@@ -81,12 +83,14 @@ if __name__ == '__main__':
         
         # run simulation
         saveRate = 1
-        simulation = Simulation(numIterations, saveRate, strategy= 2) # choose from 0, 1, 2
+        payoff = 1
+        strategy = 2
+
+        simulation = Simulation(numIterations, saveRate, strategy, payoff)
         nodes_list, adj_list = simulation(nodes, adj)
 
         
         # visualize
-        payoff = 1
         visualize_list(nodes_list, adj_list, numIterations, "ER+strat2+{0}".format(payoff), True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration 
