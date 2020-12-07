@@ -11,20 +11,43 @@ import time
 from tqdm import tqdm
 
 
+# helper function: create directory if not already exists
+def creat_dir(folder_name, catagory="visualization"):
+        dir_path = os.path.dirname(os.path.realpath(__file__))          # NOT os.getcwd() <——> this incantation is faulty
+        path = "{directory}/{catagory}/{subdirectory}/".format(directory = dir_path, catagory=catagory, subdirectory=folder_name)
+        mode = 0o755
+        # output graph png
+        try:  
+                os.makedirs(path, mode)
+        except OSError as error:  
+                pass
+        return path
+
+def commandline_decorator(interface):
+        def inner(*args, **kwargs):     # must have inner function to take and transfer the proper arguments
+                print("\n----------------------------------")
+                print("      Begin Visualization...")
+                print("----------------------------------")
+                
+                interface(*args, **kwargs)
+                
+                dir_path = os.path.dirname(os.path.realpath(__file__))
+                print("\n----------------------------------")
+                print("     Visualization Complete!")
+                print("----------------------------------\n")
+                print(f'View Visualizations in: \n{dir_path}/visualization\n\n')
+        return inner
+
 '''
-# INTERFACE: 
-# if input is a list of node lists and list of adj matricies, 
-# outputs graph given folder_name and generates gif
-# 4th parameter (model name) is for bookkeeping purposes
-# 5th parameter (defaulted to True) means position is LOCKED for future iteration 
-# choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
+# INTERFACE (i.e. the only function you need to use): 
+        # if input is a list of node lists and list of adj matricies, 
+        # outputs graph given folder_name and generates gif
+        # 4th parameter (model name) is for bookkeeping purposes
+        # 5th parameter (defaulted to True) means position is LOCKED for future iteration 
+        # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
 '''
+@commandline_decorator
 def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_lock=True):
-        
-        print("\n----------------------------------")
-        print("      Begin Visualization...")
-        print("----------------------------------")
-        
         print("\nGenerating graphs...")
         # create directories and generate correct absolute path name
         path_network, path_node_histogram, path_edge_histogram, path_animation, path_evolution = creat_dir(model_name + " (network)"), creat_dir(model_name + " (node-histogram)"), creat_dir(model_name + " (edge-histogram)"), creat_dir("animation"), creat_dir("evolution")
@@ -47,15 +70,9 @@ def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_l
         # generating graph over time for node status + edge type
         plot_status_over_time(nodesDict_list, model_name, path_evolution)
         
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        print("\n----------------------------------")
-        print("     Visualization Complete!")
-        print("----------------------------------\n")
-        print("View Visualization in: " + dir_path + "/visualization" + "\n")
-
 
 '''
-func generate_png_csv
+func generate_png_csv (the alternate interface for 1 time visualizations)
 @param 
         nodes: dictionary of nodes
         adj: adjacency matrix (numpy 2D array)
@@ -73,7 +90,7 @@ func generate_png_csv
         if an optional color_edges is passed, then edges will be colored with this rule:
                 if both stubs connect to cooperating nodes, edge = dark green
                 if both stubs connect to defecting nodes, edge = red
-                if one stub connects to cooperating node and the other defecting node, edge = yellow
+                if one stub connects to cooperating node and the other defecting node, edge = orange (leaning yellow)
 '''
 # node colors [0,1] : green, red (orangish), 
 # edge colors [2,3,4] : dark green, orange(leaning yellow), red (leaning magenta)
@@ -321,16 +338,3 @@ def generate_gif(model_name, input_path, output_path):
                                 pbar.set_postfix(file=os.path.basename(pic), refresh=True)             # does NOT work on a POSIX system to get the base name from a Windows styled path
                                 pbar.update(os.stat(pic).st_size)
         print("GIF Generated: stored in {0}".format(output_path))
-        
-
-# helper function: create directory if not already exists
-def creat_dir(folder_name, catagory="visualization"):
-        dir_path = os.path.dirname(os.path.realpath(__file__))          # NOT os.getcwd() <——> this incantation is faulty
-        path = "{directory}/{catagory}/{subdirectory}/".format(directory = dir_path, catagory=catagory, subdirectory=folder_name)
-        mode = 0o755
-        # output graph png
-        try:  
-                os.makedirs(path, mode)
-        except OSError as error:  
-                pass
-        return path
