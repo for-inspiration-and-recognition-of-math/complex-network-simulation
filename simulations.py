@@ -11,6 +11,40 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 dirName = os.path.dirname(__file__)
 
+class CalcPayoff:
+    def __init__(self, payoffID):
+        self.payoffID = payoffID
+
+    def __call__(self, status1, status2):
+        if self.payoffID == 0:  # using original prisoner's dilemma matrix
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 1, 1
+            elif status1 == 0 and status2 == 1:
+                return -1, 2
+            elif status1 == 1 and status2 == 0:
+                return 2, -1
+            else:
+                return 0, 0
+
+        elif self.payoffID == 1:
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 1, 1
+            elif status1 == 0 and status2 == 1:
+                return -1, 1
+            elif status1 == 1 and status2 == 0:
+                return 1, -1
+            else:
+                return -1, -1
+
+        else:
+            if status1 == 0 and status2 == 0:  # both cooperate
+                return 0, 0
+            elif status1 == 0 and status2 == 1:
+                return -1, 1
+            elif status1 == 1 and status2 == 0:
+                return 1, -1
+            else:
+                return 0, 0
 
 class Node:
     def __init__(self, status):
@@ -18,24 +52,33 @@ class Node:
         self.wealth = 0
         self.lastPayoff = []
 
-    def updatePayoff(self, newPayoff):
+    def updatePayoff(self, newPayoff, time_stamp):
         self.wealth = self.wealth + newPayoff
-        self.lastPayoff.append(newPayoff)
+        self.lastPayoff[time_stamp].append(newPayoff)
 
     def updateStatus(self, newStatus):
         self.status = newStatus
+        
+    def initalizeLastPayoffList(self, numIterations):
+        self.lastPayoff = [ [] for i in range (numIterations) ]
+        
 
 
 class Simulation:
-    def __init__(self, numIterations, saveRate, strategy):
+    def __init__(self, numIterations, saveRate, strategy, payoffID):
         self.strategy = strategy
         self.numIterations = numIterations
+        self.payoffID = payoffID
+        self.calcPayoff = CalcPayoff(payoffID)
         self.saveRate = saveRate
         self.savePath = os.path.join(dirName, 'savedInfo')
         if not os.path.exists(self.savePath):
             os.makedirs(self.savePath)
 
     def __call__(self, nodesDict, adjMatrix):
+        for node in nodesDict.values():
+            node.initalizeLastPayoffList(self.numIterations)
+            
         if self.strategy == 0:
             return self.simulation_simplest(nodesDict, adjMatrix)
         else:
@@ -88,36 +131,37 @@ class Simulation:
         for iterID in tqdm(range(self.numIterations)):
             adjMatrix = deepcopy(adjMatrix_list[-1])
             nodesDict = deepcopy(nodesDict_list[-1])
-
+        
             for i in range(0, numNodes):
                 for j in range(0, i):
                     if adjMatrix[i][j]:  # there is an edge
                         # Update edges
-                        if nodesDict[i].status == 1 and nodesDict[j].status == 1:
-                            adjMatrix[i][j] = 0
-                            adjMatrix[j][i] = 0
-                            excludingNodesID = [i, j]
-                            adjMatrix = self.linkToNewNode(adjMatrix, i, excludingNodesID)
+                        if (type != 3):
+                            if nodesDict[i].status == 1 and nodesDict[j].status == 1:
+                                adjMatrix[i][j] = 0
+                                adjMatrix[j][i] = 0
+                                excludingNodesID = [i, j]
+                                adjMatrix = self.linkToNewNode(adjMatrix, i, excludingNodesID)
 
-                        elif nodesDict[i].status == 1 or nodesDict[j].status == 1:
-                            adjMatrix[i][j] = 0
-                            adjMatrix[j][i] = 0
-                            excludingNodesID = [i, j]
+                            elif nodesDict[i].status == 1 or nodesDict[j].status == 1:
+                                adjMatrix[i][j] = 0
+                                adjMatrix[j][i] = 0
+                                excludingNodesID = [i, j]
 
-                            adjMatrix = self.linkToNewNode(adjMatrix, j, excludingNodesID) if nodesDict[i].status == 1 \
-                                else self.linkToNewNode(adjMatrix, i, excludingNodesID)
+                                adjMatrix = self.linkToNewNode(adjMatrix, j, excludingNodesID) if nodesDict[i].status == 1 \
+                                    else self.linkToNewNode(adjMatrix, i, excludingNodesID)
 
-                        else:
-                            pass
+                            else:
+                                pass
 
                         # Update node classes
-                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
+                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j], iterID)
 
                         if type == 1:
                             nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i])
                             nodesDict[j] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[j])
 
-                        elif type == 2:
+                        elif type == 2 or type == 3:
                             nodeiNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[i]) if isNeighbor]
                             nodejNeighbors = [node for node, isNeighbor in zip(nodesDict.values(), adjMatrix[j]) if isNeighbor]
                             nodesDict[i] = self.updateNodesStatusBasedOnAvgPayoff(nodesDict[i], nodeiNeighbors)
@@ -167,12 +211,12 @@ class Simulation:
                                 adjMatrix[i][newNodeToLink] += 1
                                 adjMatrix[newNodeToLink][i] += 1 # i forms a new edge with another node
                         else:
-                            # adjMatrix[i][j] = 1
-                            # adjMatrix[j][i] = 1
+                            adjMatrix[i][j] = 1
+                            adjMatrix[j][i] = 1
                             pass
 
                         # Update node classes
-                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j])
+                        nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j], iterID)
                         
                         if type == 1:
                             nodesDict[i] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[i])
@@ -201,28 +245,40 @@ class Simulation:
         return node
 
     def updateNodesStatusBasedOnLastPayoff(self, node):
-        if len(node.lastPayoff) <= 2:
+        non_empty = 0
+        for iteractions in node.lastPayoff:
+            if len(iteractions) > 0:
+                non_empty += 1
+        if non_empty < 2:
             return node
-
-        if node.lastPayoff[-1] < node.lastPayoff[-2]:
+ 
+        ## average of last iteration
+        last_interation = -1
+        for i in range (len(node.lastPayoff) - 1, -1, -1):
+            if len(node.lastPayoff[i]) > 0:
+                last_iteration = i
+                break
+            
+        last_avg = np.mean(node.lastPayoff[last_iteration])
+        
+        ## average of second last iteration
+        second_last_interation = -1
+        for i in range (last_iteration - 1, -1, -1):
+            if len(node.lastPayoff[i]) > 0:
+                second_last_interation = i
+                break
+        
+        second_last_avg = np.mean(node.lastPayoff[second_last_interation])
+        
+        if last_avg < second_last_avg:
             newStatus = 1 if node.status == 0 else 0
             node.updateStatus(newStatus)
         return node
 
-    def gamePayoff(self, status1, status2):
-        if status1 == 0 and status2 == 0: # both cooperate
-            return 2, 2
-        elif status1 == 0 and status2 == 1:
-            return -1, 1
-        elif status1 == 1 and status2 == 0:
-            return 1, -1
-        else:
-            return -1, -1
-
-    def updateWithGamePayoff(self, node1, node2):
-        newPayoff1, newPayoff2 = self.gamePayoff(node1.status, node2.status)
-        node1.updatePayoff(newPayoff1)
-        node2.updatePayoff(newPayoff2)
+    def updateWithGamePayoff(self, node1, node2, time_stamp):
+        newPayoff1, newPayoff2 = self.calcPayoff(node1.status, node2.status)
+        node1.updatePayoff(newPayoff1, time_stamp)
+        node2.updatePayoff(newPayoff2, time_stamp)
         return node1, node2
 
     def saveIndividualOutputToCsv(self, nodesDictList, adjMatrixList):
@@ -246,13 +302,13 @@ class Simulation:
 
     def saveOutput(self, nodesDict_list, adjMatrix_list):
         # save nodes dict
-        path = os.path.join(self.savePath, 'nodesDict_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        path = os.path.join(self.savePath, 'nodesDict_strategy{}payoff{}saveRate{}.pickle'.format(self.strategy, self.payoffID, self.saveRate))
         pklFile = open(path, "wb")
         pickle.dump(nodesDict_list, pklFile)
         pklFile.close()
 
         # save adjmatrix
-        path = os.path.join(self.savePath, 'adjMat_strategy{}saveRate{}.pickle'.format(self.strategy, self.saveRate))
+        path = os.path.join(self.savePath, 'adjMat_strategy{}payoff{}saveRate{}.pickle'.format(self.strategy, self.payoffID, self.saveRate))
         pklFile = open(path, "wb")
         pickle.dump(adjMatrix_list, pklFile)
         pklFile.close()
