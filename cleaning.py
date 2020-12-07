@@ -94,9 +94,9 @@ def generate_node_dict(num_nodes,  cooperator_proportion = 0.5, seed =100 ):
 	for i in range (0, num_nodes):
 		unif = random.uniform(0, 1)
 		if unif <= cooperator_proportion:
-			nodes[i] = Node(0)
+			nodes[i] = Node(0, i) # TODO: added node id to node class
 		else:
-			nodes[i] = Node(1)
+			nodes[i] = Node(1, i)
 	return nodes
 
 	
