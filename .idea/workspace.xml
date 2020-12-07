@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="71486c9c-94a5-46e2-ada6-3edaba36d9f0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/M168-essay4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cleaning.py" beforeDir="false" afterPath="$PROJECT_DIR$/cleaning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round0.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round20.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round40.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round60.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round80.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/adjMatrix_strategy0_round99.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round0.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round20.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round40.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round60.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round80.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/savedInfo/nodeClassInfo_strategy0_round99.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulations.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization.py" afterDir="false" />
-    </list>
+    <list default="true" id="71486c9c-94a5-46e2-ada6-3edaba36d9f0" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,12 +165,12 @@
       <option name="presentableId" value="Default" />
       <updated>1607062676663</updated>
       <workItem from="1607062683089" duration="832000" />
-      <workItem from="1607289156895" duration="949000" />
+      <workItem from="1607289156895" duration="1087000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8968000" />
+    <option name="totallyTimeSpent" value="9106000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -209,7 +189,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.2381433" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.2381433" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.24419779" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
