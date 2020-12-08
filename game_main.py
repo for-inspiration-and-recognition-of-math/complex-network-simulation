@@ -1,4 +1,4 @@
-from simulations import *
+from simulations_updated import *
 from cleaning import *
 from visualization import *
 from analysis import *
@@ -43,7 +43,6 @@ def complexity_graph():
                 time_elapsed.append(elapsed)
                 print("Node count: {0}, Time Elapsed: {1} seconds".format(i, elapsed))            
 
-
         # convert to np array
         x = np.array(node_count)
         y = np.array(time_elapsed)    
@@ -69,21 +68,22 @@ def complexity_graph():
         plt.legend()
         plt.show()             
         plt.close()
-                
 
 if __name__ == '__main__':
 
         num_nodes = 10
-        numIterations = 2
+        numIterations = 6
         model = "BA"
         
         # # generate network
-        nodes, adj = generate_random_network("BA", num_nodes, p=0.4)
+        nodes, adj = generate_random_network(model, num_nodes, p=0.9)
         # nodes, adj = facebook_clean()
         
         for node in nodes.values():
-                print(node.status, end = ", ")
+                # print("Node{} status: {}".format(node.nodeID, node.status), end = ", ")
+                print(node.status, end = ', ')
         print()
+        initStatus = [node.status for node in nodes.values()]
 
         
         # # run simulation
@@ -93,12 +93,17 @@ if __name__ == '__main__':
         simulation = Simulation(numIterations, saveRate, strat, payoff) # choose from 0, 1, 2
         nodes_list, adj_list = simulation(nodes, adj)
 
-        
-        for node in nodes_list[-1].values():
-                print(node.status, end=" + ")
+
+        for nodeID, node in nodes_list[-1].items():
+                initStatusOfNode = initStatus[nodeID]
+                changed = 'changed------' if node.status != initStatusOfNode else ''
+
+                # if node.status != initStatusOfNode:
+                print("Node{} status: {}, {}".format(node.nodeID, node.status, changed))
                 print(node.lastPayoff)
                 for payoff in node.lastPayoff:
-                        print(np.mean(payoff), end =", ")
+                        mean = np.mean(payoff) if len(payoff) else None
+                        print(mean, end =", ")
                 print()
 
 
@@ -107,8 +112,8 @@ if __name__ == '__main__':
         
         # visualize_list(nodes_list, adj_list, numIterations, "{0}+{1}+{2}".format(model, strat, payoff), True)
          # 4th parameter (model name) is for bookkeeping purposes
-         # 5th parameter (defaulted to True) means position is LOCKED for future iteration 
+         # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
-        
+
 
         # complexity_graph()
