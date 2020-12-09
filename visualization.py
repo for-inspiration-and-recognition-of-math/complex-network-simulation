@@ -9,9 +9,13 @@ import os
 import imageio
 import time
 import concurrent.futures
-import multiprocessing
+from multiprocessing import Process, Pipe
+import threading
 from tqdm import tqdm
 
+
+good_good_edges_list, mixed_edges_list, bad_bad_edges_list = {}, {}, {}
+# no these are not misnomers, they will eventually be sorted into lists
 
 # helper function: create directory if not already exists
 def creat_dir(folder_name, catagory="visualization"):
@@ -60,33 +64,65 @@ def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_l
                 for root, dirs, files in os.walk(model_path, onerror=lambda err: print("OSwalk error: " + repr(err))):
                         for file in files:
                                 os.remove(os.path.join(root, file))
-                                
         
-        # would be declared as global variables, if not for concurrency
-        good_good_edges_list, mixed_edges_list, bad_bad_edges_list = {}, {}, {}
+        # ---------------------------------------------------------
+        # generating graphs using multiple subprocesses 
+        #       (use previous releases for non-concurrent version)
+        # ---------------------------------------------------------
+        global good_good_edges_list, mixed_edges_list, bad_bad_edges_list
+        runs = []
+
+        def update_bar(pbar, total):
+                cur = 0
+                while len(runs) < total:
+                        x_sync = len(runs)
+                        pbar.update(x_sync - cur)
+                        cur=x_sync
+                pbar.update(len(runs) - cur)
+
         
-        # create graphs
         with concurrent.futures.ProcessPoolExecutor() as executor:
-                for i in tqdm(range(0, iterations + 1)):
-                        # executor.submit(test)
-                        executor.submit(visualization, nodesDict_list[i], adjMatrix_list[i], 
-                                        path_network, path_node_histogram, path_edge_histogram, 
-                                        good_good_edges_list, mixed_edges_list, bad_bad_edges_list, 
-                                        i, pos_lock)
+                pbar = tqdm(total = iterations+1, unit='graphs')
                 
-        # create graphs (linear)
-        # for i in tqdm(range(0, iterations + 1)):
-        #         visualization(nodesDict_list[i], adjMatrix_list[i], path_network, path_node_histogram, path_edge_histogram, i, pos_lock)
+                t1 = threading.Thread(target=update_bar, args=[pbar, iterations+1])
+                t1.start()
                 
+                for i in range(0, iterations + 1):
+                        f = executor.submit(visualization, nodesDict_list[i], adjMatrix_list[i], 
+                                        path_network, path_node_histogram, path_edge_histogram, i, pos_lock)
+                        f.add_done_callback(lambda x: print(f'{x.result()[0]} ', end='', flush=True))
+                        runs.append(f)
+
+                t1.join()
+                pbar.close()
+                print("all subprocesses queued, waiting to complete...\n\nAwaiting subprocess completion... \n>", end = ' ', flush=True)
+                
+                
+                for run in concurrent.futures.as_completed(runs):
+                        index = run.result()[0]
+                        good_good_edges_list[index] = run.result()[1]
+                        mixed_edges_list[index] = run.result()[2]
+                        bad_bad_edges_list[index] = run.result()[3]
+                print("\n<--- all subprocesses completed --->")
+        
+        ### convert from dictionary into lists sorted by dictionary key ###
+
+        good_good_edges_list = sorted(good_good_edges_list.items())     # coverts into sorted tuples
+        good_good_edges_list = [ x[1] for x in good_good_edges_list ]    # converts into lists of lists (removes the index => tuple[0])
+        
+        mixed_edges_list = sorted(mixed_edges_list.items())     
+        mixed_edges_list = [ x[1] for x in mixed_edges_list ] 
+        
+        bad_bad_edges_list = sorted(bad_bad_edges_list.items())     
+        bad_bad_edges_list = [ x[1] for x in bad_bad_edges_list ] 
+        
+        
         # compile PNGs into gif (for both network and histogram)
-        # with concurrent.futures.ProcessPoolExecutor() as executor:
-        #         executor.submit(generate_gif, [model_name + " (network)", path_network, path_animation])
-        #         executor.submit(generate_gif, [model_name + " (edge-histogram)", path_edge_histogram, path_animation])
-        #         executor.submit(generate_gif, [model_name + " (node-histogram)", path_node_histogram, path_animation])
-                                     
-        generate_gif(model_name + " (network)", path_network, path_animation)
-        if generate_gif(model_name + " (edge-histogram)", path_edge_histogram, path_animation): print("No edge to plot!")
-        generate_gif(model_name + " (node-histogram)", path_node_histogram, path_animation)
+        print("\nCompiling GIF...")
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(generate_gif, model_name + " (network)", path_network, path_animation)
+                executor.submit(generate_gif, model_name + " (edge-histogram)", path_edge_histogram, path_animation)
+                executor.submit(generate_gif, model_name + " (node-histogram)", path_node_histogram, path_animation)
         
         # # generating graph over time for node status + edge type
         plot_status_over_time(nodesDict_list, model_name, path_evolution, 
@@ -123,7 +159,7 @@ func generate_png_csv (the alternate interface for 1 time visualizations)
 color = ['#03b500', '#b52a00', "#077d11", "#ffbb3d", "#db0231"]    
 optimized_pos, position_lock = False, False            #setting position variables
 
-def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histogram, good_good_edges_list, mixed_edges_list, bad_bad_edges_list, index=-1, pos_lock = True, color_edges=True):
+def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histogram, index=-1, pos_lock = True, color_edges=True):
         global color
 
         G = nx.convert_matrix.from_numpy_matrix(adj)
@@ -153,8 +189,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         # Add relationship-sensitive coloring to edges
         if color_edges:
                 good_good_edges = []
-                bad_bad_edges = []
                 mixed_edges = []
+                bad_bad_edges = []
                 
                 for i in range (len(adj)):
                         for j in range (len(adj)):
@@ -172,13 +208,6 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
                 nx.draw_networkx_edges(G,optimized_pos,
                         edgelist=bad_bad_edges,
                         width=edge_width,alpha=edge_alpha,edge_color=color[4])
-                
-                # record edge type status for later plot
-                print(f'got here + {index}')
-                good_good_edges_list[index] = good_good_edges
-                bad_bad_edges_list[index] = bad_bad_edges
-                mixed_edges_list[index] = mixed_edges
-                
         
         # saving network graphs and histograms as PNGs in separate folders
         if index != -1: plt.savefig(path_network + "net-" + repr(index) + ".png", format="PNG")      # output graph png 
@@ -206,7 +235,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         plt.xticks(bar_spacing, edge_types)
 
         top = len(good_good_edges) + len(bad_bad_edges) + len(mixed_edges)
-        if top <= 0: return 1            # since no more interactions, simulation is finished
+        if top <= 0: return index, good_good_edges, mixed_edges, bad_bad_edges            
+                # since no more interactions (because no more edges), simulation is finished (just return empty lists)
         
         plt.ylim([0, top])
         plt.grid(True, axis='y')
@@ -242,8 +272,8 @@ def visualization(nodes, adj, path_network, path_node_histogram, path_edge_histo
         plt.close()
         
         
-        #enable method chaining
-        return G        
+        # enable parallel concurrency
+        return index, good_good_edges, mixed_edges, bad_bad_edges
 
 
 # graph the status of all nodes over time (proportion normalized by total)
@@ -290,9 +320,8 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         ##### graph edge type evolution #####
         
         print("Plotting edge type evolution...\n")
-        # get edge counts
-        print(good_good_edges_list)
         
+        # get edge counts
         total = [ len(good_good_edges_list[i]) + len(mixed_edges_list[i]) + len(bad_bad_edges_list[i]) 
                  if len(good_good_edges_list[i]) + len(mixed_edges_list[i]) + len(bad_bad_edges_list[i]) > 0
                  else -1
@@ -368,7 +397,6 @@ func generate_gif
 Note: only call when all graphs have been generated using func visualization(...)
 '''
 def generate_gif(model_name, input_path, output_path):
-        print("\nCompiling GIF...")
         my_path = input_path
         # basically the python version of regular expression search of list segments
         # you can also use globbing and bash commands, but apparently wildcard symbols can be unstable across different shell versions

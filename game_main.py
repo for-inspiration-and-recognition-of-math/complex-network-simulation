@@ -70,51 +70,33 @@ def complexity_graph():
         plt.close()
 
 if __name__ == '__main__':
-
-        num_nodes = 300
-        numIterations = 30
-        model = "Karate"
+        start = time.perf_counter()
+        
+        num_nodes = 100
+        numIterations = 200
+        model = "ER"
         
         # # generate network
-        # nodes, adj = generate_random_network(model, num_nodes, p=0.9)
+        nodes, adj = generate_random_network(model, num_nodes, p=0.2)
         # nodes, adj = facebook_clean()
-        nodes, adj = karate_clean()
-        
-        # for node in nodes.values():
-        #         # print("Node{} status: {}".format(node.nodeID, node.status), end = ", ")
-        #         print(node.status, end = ', ')
-        # print()
-        # initStatus = [node.status for node in nodes.values()]
+        # nodes, adj = karate_clean()
 
         
         # # run simulation
         saveRate = 1
-        strat = 1
+        strat = 3
         payoff = 0
         simulation = Simulation(numIterations, saveRate, strat, payoff) # choose from 0, 1, 2
         nodes_list, adj_list = simulation(nodes, adj)
-
-
-        # for nodeID, node in nodes_list[-1].items():
-        #         initStatusOfNode = initStatus[nodeID]
-        #         changed = 'changed------' if node.status != initStatusOfNode else ''
-
-        #         # if node.status != initStatusOfNode:
-        #         print("Node{} status: {}, {}".format(node.nodeID, node.status, changed))
-        #         print(node.lastPayoff)
-        #         for payoff in node.lastPayoff:
-        #                 mean = np.mean(payoff) if len(payoff) else None
-        #                 print(mean, end =", ")
-        #         print()
-
-
         
         # # visualize
         
-        visualize_list(nodes_list, adj_list, numIterations, "{0}+{1}+{2}".format(model, strat, payoff), True)
+        visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
 
+        end = time.perf_counter()
+        print(f'time elapsed: {end-start}')
 
         # complexity_graph()

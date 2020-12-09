@@ -29,7 +29,7 @@ def simulation(nodes, a, num_iterations):
                         for j in range (0, i):
                                 if adj[i][j]:
                                         if nodes[i].status == 1 or nodes[j].status == 1:
-                                                if (random.uniform(0, 1) <= 0.35):      # 10 percent chance
+                                                if (random.uniform(0, 1) <= 0.01):      # 10 percent chance
                                                         adj[i][j] = 0
                                                         adj[j][i] = 0
                                         else:
@@ -41,8 +41,8 @@ def simulation(nodes, a, num_iterations):
 
 if __name__ == '__main__':
         #  defining variables
-        num_nodes = 300
-        numIterations = 5
+        num_nodes = 500
+        numIterations = 200
         nodes = {x:Node() for x in range (num_nodes)}
         adj = np.zeros((num_nodes, num_nodes))
 
@@ -63,5 +63,9 @@ if __name__ == '__main__':
         #                 print(i.status, end=", ") 
         #         print()
 
-
+        start = time.perf_counter()
+        
         visualize_list(nodes_list, adj_list, numIterations, "ER+strat2", pos_lock=True)        # 4th parameter (model name) is for bookkeeping purposes
+        
+        end = time.perf_counter()
+        print(f'time spent: {end - start}')
