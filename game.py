@@ -42,7 +42,7 @@ def simulation(nodes, a, num_iterations):
 if __name__ == '__main__':
         #  defining variables
         num_nodes = 300
-        numIterations = 30
+        numIterations = 5
         nodes = {x:Node() for x in range (num_nodes)}
         adj = np.zeros((num_nodes, num_nodes))
 
