@@ -1,19 +1,43 @@
 import networkx as nx 
 import numpy as np
 from cleaning import *
+import pandas as pd
 
-def centrality(adj , type):
+def centrality(adj , node_dict, type):
 	G = nx.convert_matrix.from_numpy_matrix(adj)
+	value_dict = {}
+	return_dict = {}
 	if type == 'degree':
-		return nx.degree_centrality(G)
+		value_dict =  nx.degree_centrality(G)
 	if type == 'eigenvector':
-		return nx.eigenvector_centrality(G)
+		value_dict =  nx.eigenvector_centrality(G)
 	if type =='katz':
-		return nx.katz_centrality(G)
+		value_dict = nx.katz_centrality(G)
 	if type == 'closeness':
-		return nx.closeness_centrality(G)
+		value_dict =  nx.closeness_centrality(G)
 	if type == 'betweenness':
-		return nx.betweenness_centrality(G)
+		value_dict = nx.betweenness_centrality(G)
+	for (index1, node), (index2, value) in zip(nodes.items(), value_dict.items()):
+		return_dict[node] = value
+	return return_dict
+
+
+def all_measures( node_dict, adj, alpha = 0.9):
+	G = nx.convert_matrix.from_numpy_matrix(adj)
+	dict_list = []
+
+	degree = nx.degree_centrality(G)
+	df = pd.DataFrame.from_dict(degree, orient = 'index')
+	df.columns = ['Degree']
+	df['eigenvector'] = pd.Series(nx.eigenvector_centrality(G))
+	df['katz'] = pd.Series(nx.katz_centrality(G))
+	df['closeness'] = pd.Series(nx.closeness_centrality(G))
+	df['betweenness'] = pd.Series(nx.betweenness_centrality(G))
+	df['pagerank'] = pd.Series(nx.pagerank(G, alpha))
+	df['local_clustering_coefficients'] = pd.Series(nx.clustering(G))
+
+	return( df)
+
 
 def geodesic(adj):
 	G = nx.convert_matrix.from_numpy_matrix(adj)
@@ -25,7 +49,8 @@ def average_clustering_coefficient(adj):
 
 
 if __name__ == '__main__':
-	adj = karate_clean()[1]
-	adj2 = generate_random_network('ER', 500, p =0.05)[1]
-	#print(centrality(karate_clean()[1], 'betweenness'))
-	print(geodesic(adj2))
+	model = 'BA'
+	num_nodes = 15
+	nodes, adj = generate_network(model, num_nodes, p=0.9)
+	print(all_measures(nodes, adj))
+

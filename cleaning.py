@@ -8,6 +8,23 @@ import random
 from simulations import Node
 
 
+def generate_network(type, num_nodes, num_subgraphs = 100, cooperator_proportion= 0.5,  seed=100, p =0.5, m =3, k =3):
+	if type == 'twitter':
+		return twitter_random_subgraph_clean(cooperator_proportion, num_subgraphs, seed)
+	elif type == 'facebook':
+		return facebook_clean(cooperator_proportion)
+	elif type == 'karate':
+		return karate_clean(cooperator_proportion)
+	elif type == 'ER':
+		return generate_random_network(type, num_nodes , cooperator_proportion, p )
+	elif type == 'WS':
+		return generate_random_network(type, num_nodes, cooperator_proportion, p, k)
+	elif type == 'BA':
+		return generate_random_network(type, num_nodes, cooperator_proportion,m)
+	else:
+		print("enter a valid network")
+
+
 def twitter_random_subgraph_clean( cooperator_proportion= 0.5, num_subgraphs =100, seed =100):
 	directory = os.path.dirname(__file__) + '/resources' + '/twitter'
 	os.chdir(directory)
