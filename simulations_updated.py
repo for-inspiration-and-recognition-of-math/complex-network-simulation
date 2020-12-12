@@ -149,12 +149,12 @@ class Simulation:
                                 brokenEdges.append((i, j))
                                 if nodesDict[j].status == 1: # form new edges for i
                                     currentNodesToAvoidForI = nodesToAvoidInfo.get(i, 'noNodesYet')
-                                    newNodesToAvoidForI = currentNodesToAvoidForI + [j] if currentNodesToAvoidForI is not 'noNodesYet' else [j]
+                                    newNodesToAvoidForI = currentNodesToAvoidForI + [j] if currentNodesToAvoidForI != 'noNodesYet' else [j]
                                     nodesToAvoidInfo[i] = newNodesToAvoidForI
 
                                 else:
                                     currentNodesToAvoidForJ = nodesToAvoidInfo.get(j, 'noNodesYet')
-                                    newNodesToAvoidForJ = currentNodesToAvoidForJ + [i] if currentNodesToAvoidForJ is not 'noNodesYet' else [i]
+                                    newNodesToAvoidForJ = currentNodesToAvoidForJ + [i] if currentNodesToAvoidForJ != 'noNodesYet' else [i]
                                     nodesToAvoidInfo[j] = newNodesToAvoidForJ
 
                         # Update node payoff history
