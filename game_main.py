@@ -94,24 +94,37 @@ if __name__ == '__main__':
         num_nodes = int(input("Node # (default: 200): ") or "200")
         numIterations = int(input("Iteration # (default: 100): ",) or "100")
         model = str(input("Model (default: ER): ") or "ER")
+        p = float(input("p (default: 0.05): ") or 0.05) if model == 'ER' or 'WS' else 0.05
+        k = int(input("k (default: 2): ") or 2) if model == 'WS' else 2
         strat = int(input("Strat # (default: 3): ") or "3")
         payoff = int(input("Payoff # (default: 0): ") or "0")
         saveRate = int(input("Saverate # (default: 1): ") or "1")
-        
         load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
+
+        m = 3
         
         # Step 1. generate network
-        nodes, adj = generate_random_network(model, num_nodes, p=0.2)
+        nodes, adj = generate_random_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
         # nodes, adj = facebook_clean()
         # nodes, adj = karate_clean()
         
         
         # Step 2. run simulation
-        if load_flag:
-                nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
+        if model == 'ER':
+            fileName = '{}_n={}_p={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, p, strat, payoff, saveRate, numIterations)
+        elif model == 'WS':
+            fileName = '{}_n={}_p={}_k={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, p, k, strat, payoff, saveRate, numIterations)
+        elif model == 'BA':
+            fileName = '{}_n={}_m={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, m, strat, payoff, saveRate, numIterations)
         else:
-                simulation = Simulation(numIterations, saveRate, strat, payoff) # choose from 0, 1, 2
-                nodes_list, adj_list = simulation(nodes, adj)
+            fileName = '{}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, strat, payoff, saveRate, numIterations)
+
+
+        if load_flag:
+            nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
+        else:
+            simulation = Simulation(numIterations, saveRate, strat, payoff, fileName)
+            nodes_list, adj_list = simulation(nodes, adj)
         
         
         print(f'time used to simulate: {time.perf_counter()-start}s')

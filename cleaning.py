@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import re
 import random
-from simulations import Node
+from simulations_updated import Node
 
 
 def generate_network(type, num_nodes, num_subgraphs = 100, cooperator_proportion= 0.5,  seed=100, p =0.5, m =3, k =3):
