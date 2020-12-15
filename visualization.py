@@ -407,7 +407,7 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         print()
 
 
-def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list):
+def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list, community_detection_list):
         #--------------#
         # 4. graphing properties in analysis.py (centralities, mean geodesic distance, clustering coefficient) #
         #       Extension of above function
@@ -439,30 +439,25 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
         
         path = creat_dir("dataframe", catagory="test")
         
+        # building non-discriminant lists
         for i in range(num_iteration):
                 measures_dataframe = measures_list[i]
                 matrix = measures_dataframe.to_numpy()
         
                 for node in matrix:
-                        # building non-discriminant lists
                         node_status_history[i].append(node[2])
                         node_degree_history[i].append(node[3])
                         node_eigenvector_history[i].append(node[4])
                         node_pagerank_history[i].append(node[5])
                         node_local_clustering_history[i].append(node[6])
-                        
-                        # building specific lists
-                        if node[2] == 0:
-                                good_node_degree_avg
-                        
-                np.savetxt(f"{path}/some_output.txt", matrix, fmt='%s')
         
-        # calculate specific lists for plotting
+        
+        # building specific lists used for plotting
         for i in range (num_iteration):
                 good_degree_sum, good_eigenvector_sum, good_pagerank_sum, good_local_clustering_sum = 0, 0, 0, 0
                 bad_degree_sum, bad_eigenvector_sum, bad_pagerank_sum, bad_local_clustering_sum = 0, 0, 0, 0
-                num_bad_nodes = sum(node_status_history[i])
-                num_good_nodes = num_nodes - num_bad_nodes
+                num_bad_nodes = sum(node_status_history[i]) if sum(node_status_history[i]) > 0 else 1   # since the top would also be equal to 1
+                num_good_nodes = num_nodes - num_bad_nodes if num_nodes - num_bad_nodes > 0 else 1      # same logic
                 
                 for j in range (num_nodes):
                         if node_status_history[i][j] == 0:
@@ -487,7 +482,7 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
                 bad_node_local_clustering_avg.append(bad_local_clustering_sum / num_bad_nodes)
         
 
-        x = [ x for x in range(num_iteration)]
+        x = [ x for x in range(num_iteration)]		# just indexing iterations counts
         g1, g2, g3, g4 = good_node_degree_avg, good_node_eigenvector_avg, good_node_pagerank_avg, good_node_local_clustering_avg
         b1, b2, b3, b4 = bad_node_degree_avg, bad_node_eigenvector_avg, bad_node_pagerank_avg, bad_node_local_clustering_avg
         
@@ -504,12 +499,49 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
         
         plt.xlabel('Iteration #', fontsize=15)
         plt.ylabel('Measurements', fontsize=15)
-        plt.title("Analysis calculations over iterations", fontsize=20)
+        plt.title("Measurements over iterations", fontsize=20)
+        plt.grid(True, axis='x')
 
         plt.legend()
         plt.savefig(path_evolution + model_name + "--Analysis.png", format="PNG")
         plt.close()
         
+        
+        #--------------#
+        # 5. community detection in analysis.py
+        #--------------#
+        
+        node_avg_status = [ [] for _ in range (num_iteration) ]
+        community_size = [ [] for _ in range (num_iteration) ]
+        
+        for i in range (num_iteration):
+                cur_community = community_detection_list[i]
+                for j in range (1, len(cur_community), 2):	# just taking status list
+                        node_avg_status[i].append(mean(cur_community[j]))
+                        community_size[i].append(len(cur_community[j]))
+        
+        
+        x = [ [i]*len(node_avg_status[i]) for i in range (len(node_avg_status)) ]  # for plotting purposes
+        y = node_avg_status
+        z = []
+        for iteration in community_size:
+                z.append([size*100 for size in iteration])
+                
+        
+        plt.figure(figsize=(20, 15), dpi=80, facecolor='w', edgecolor='k', linewidth=1)
+        for i in range (len(node_avg_status)):
+                plt.scatter(x[i], y[i], s=z[i], alpha=0.4)
+        
+        plt.xlabel('Iteration #', fontsize=15)
+        plt.ylabel('Average Status of Community', fontsize=15)
+        plt.title("Community Formations over # iterations", fontsize=20)
+        
+        plt.plot([-0.5, num_iteration-0.5], [0.5, 0.5], 'k-', lw=1,dashes=[2, 2])
+        plt.ylim(-0.05, 1.05)
+        plt.grid(True)
+
+        plt.savefig(path_evolution + model_name + "--Community.png", format="PNG")
+        plt.close()
         
 
 
@@ -570,7 +602,7 @@ def generate_gif(model_name, input_path, output_path):
         choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)'''
 
 @commandline_decorator    
-def visualizer_spawner(nodesDict_list, adjMatrix_list, measures_list, iterations, model_name, pos_lock=True, continuation=False):
+def visualizer_spawner(nodesDict_list, adjMatrix_list, measures_list, community_detection_list, iterations, model_name, pos_lock=True, continuation=False):
         global network_histogram_flag, gif_flag, line_scatter_plot_flag, plot_3d_flag
         
         # create directories and generate correct absolute path name
@@ -664,7 +696,7 @@ def visualizer_spawner(nodesDict_list, adjMatrix_list, measures_list, iterations
         
         # generating graph of all measures (3D)
         if plot_3d_flag:
-                centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list)
+                centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list, community_detection_list)
                 
         
 
@@ -683,9 +715,9 @@ def visualizer_spawner(nodesDict_list, adjMatrix_list, measures_list, iterations
 
 def visualize(*args, **kwargs):
         global network_histogram_flag, gif_flag, line_scatter_plot_flag, plot_3d_flag
-        network_histogram_flag = 0
-        gif_flag = 0
-        line_scatter_plot_flag = 0
+        network_histogram_flag = 1
+        gif_flag = 1
+        line_scatter_plot_flag = 1
         plot_3d_flag = 1
         
         visualizer_spawner(*args, **kwargs)

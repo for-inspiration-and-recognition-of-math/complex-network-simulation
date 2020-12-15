@@ -55,12 +55,12 @@ def all_measures_master(node_dict_list, adj_list, name ):
 		for node_dict, adj, iterator in zip(node_dict_list, adj_list, it):
 			f = executor.submit(all_measures, node_dict, adj, iterator)
 			f_list.append(f)
-			print(iterator)
-
+			print(iterator, end=' ')
 			#values = all_measures(node_dict,adj,iterator,0.9)
+		print()
 		it = 0
 		for f in f_list:
-			print(it)
+			print(it, end=' ')
 			master_df = pd.concat([master_df, f.result()])
 			master_list.append(f.result())
 			it = it+1
@@ -74,12 +74,13 @@ def all_measures_master(node_dict_list, adj_list, name ):
 def community_detection(node_dict_list, adj_list ):
 	iteration_list = []
 	it = 0
+	print('iteration:', end=' ') 
 	for node_dict, adj in zip(node_dict_list, adj_list):
 		id_status_list = []
 		G = nx.from_numpy_matrix(adj)
 		c = list(greedy_modularity_communities(G))
 
-		print('iteration:' + str(it))
+		print(str(it), end=' ')
 		for val in c:
 			community = sorted(val)
 			community_status = [node_dict.get(item,item).status for item in sorted(val)]

@@ -89,8 +89,9 @@ def load_data(strat, payoff, saveRate):
 
 
 if __name__ == '__main__':
-        start = time.perf_counter()
         
+        
+        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
         num_nodes = int(input("Node # (default: 200): ") or "200")
         numIterations = int(input("Iteration # (default: 5): ",) or "5")
         model = str(input("Model (default: ER): ") or "ER")
@@ -98,7 +99,6 @@ if __name__ == '__main__':
         payoff = int(input("Payoff # (default: 0): ") or "0")
         saveRate = int(input("Saverate # (default: 1): ") or "1")
         
-        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
         
         # Step 1. generate network
         nodes, adj = generate_random_network(model, num_nodes, p=0.2)
@@ -107,28 +107,32 @@ if __name__ == '__main__':
         
         
         # Step 2. run simulation
+        start = time.perf_counter()
+        
         if load_flag:
                 nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
         else:
                 simulation = Simulation(numIterations, saveRate, strat, payoff) # choose from 0, 1, 2
                 nodes_list, adj_list = simulation(nodes, adj)
+                print(f'time used to simulate: {time.perf_counter()-start}s')
         
         
-        print(f'time used to simulate: {time.perf_counter()-start}s')
         
         
         
         # Step 3. run all measurements
+        start = time.perf_counter()
         measures_list = all_measures_master(nodes_list, adj_list, "{0}+s{1}+p{2}".format(model, strat, payoff))
+        community_detection_list = community_detection(nodes_list, adj_list)
         
-        
+        print(f'time used to calculate measures: {time.perf_counter()-start}s')
         
         
         # Step 4. Visualize
         
         start = time.perf_counter()
         
-        visualize(nodes_list, adj_list, measures_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
+        visualize(nodes_list, adj_list, measures_list, community_detection_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
