@@ -47,25 +47,7 @@ def all_measures( node_dict, adj, iteration, alpha = 0.9):
 
 	return( df)
 
-
 def all_measures_master(node_dict_list, adj_list, name ):
-	master_df = pd.DataFrame()
-	it = range(0, len(adj_list))
-
-	for node_dict, adj, iterator in zip(node_dict_list, adj_list, it):
-		print(iterator)
-		values = all_measures(node_dict,adj,iterator,0.9)
-		master_df = pd.concat([master_df,values ])
-
-	if not os.path.exists('analysis'):
-		os.makedirs('analysis')
-	directory = os.path.dirname(__file__) + '/analysis' + '/centrality_values_' + name + '-'+ str(iterator) +  '.csv' 
-	master_df.to_csv(directory)
-	return master_list
-
-
-
-def all_measures_master1(node_dict_list, adj_list, name ):
 	master_df = pd.DataFrame()
 	master_list = []
 	it = range(0, len(adj_list))
@@ -88,7 +70,7 @@ def all_measures_master1(node_dict_list, adj_list, name ):
 		os.makedirs('analysis')
 	directory = os.path.dirname(__file__) + '/analysis' + '/centrality_values_' + name + '-'+ str(iterator) +  '.csv' 
 	master_df.to_csv(directory)
-	return master_df
+	return master_list
 
 def community_detection(node_dict_list, adj_list ):
 	master_df = pd.DataFrame()

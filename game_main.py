@@ -92,7 +92,7 @@ if __name__ == '__main__':
         start = time.perf_counter()
         
         num_nodes = int(input("Node # (default: 200): ") or "200")
-        numIterations = int(input("Iteration # (default: 100): ",) or "100")
+        numIterations = int(input("Iteration # (default: 5): ",) or "5")
         model = str(input("Model (default: ER): ") or "ER")
         strat = int(input("Strat # (default: 3): ") or "3")
         payoff = int(input("Payoff # (default: 0): ") or "0")
@@ -118,11 +118,17 @@ if __name__ == '__main__':
         
         
         
-        # Step 3. visualize
+        # Step 3. run all measurements
+        measures_list = all_measures_master(nodes_list, adj_list, "{0}+s{1}+p{2}".format(model, strat, payoff))
+        
+        
+        
+        
+        # Step 4. Visualize
         
         start = time.perf_counter()
         
-        visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
+        visualize(nodes_list, adj_list, measures_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
