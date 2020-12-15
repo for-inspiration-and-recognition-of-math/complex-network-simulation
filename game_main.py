@@ -90,21 +90,27 @@ def load_data(strat, payoff, saveRate):
 
 if __name__ == '__main__':
         start = time.perf_counter()
-        
-        num_nodes = int(input("Node # (default: 200): ") or "200")
-        numIterations = int(input("Iteration # (default: 100): ",) or "100")
-        model = str(input("Model (default: ER): ") or "ER")
-        p = float(input("p (default: 0.05): ") or 0.05) if model == 'ER' or 'WS' else 0.05
-        k = int(input("k (default: 2): ") or 2) if model == 'WS' else 2
-        strat = int(input("Strat # (default: 3): ") or "3")
-        payoff = int(input("Payoff # (default: 0): ") or "0")
-        saveRate = int(input("Saverate # (default: 1): ") or "1")
-        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
 
+        model = str(input("Model (default: ER): ") or "ER")
+        strat = int(input("Strat # (default: 3): ") or "3")
+
+        if model == 'ER' or model =='WS' or model =='BA':
+            num_nodes = int(input("Node # (default: 200): ") or "200")
+            p = float(input("p (default: 0.05): ") or 0.05) if model == 'ER' or 'WS' else 0.05
+            k = int(input("k (default: 2): ") or 2) if model == 'WS' else 2
+        else:
+            num_nodes = 200
+            p = 0.05
+            k = 2
+
+        load_flag = 0 # int(input("Run(0) or Load(1) (default: 0): ") or "0")
+        numIterations = 200 #int(input("Iteration # (default: 200): ",) or "200")
+        payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
+        saveRate = 1
         m = 3
         
         # Step 1. generate network
-        nodes, adj = generate_random_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
+        nodes, adj = generate_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
         # nodes, adj = facebook_clean()
         # nodes, adj = karate_clean()
         
