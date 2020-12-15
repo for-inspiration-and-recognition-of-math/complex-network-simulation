@@ -103,8 +103,15 @@ if __name__ == '__main__':
             p = 0.05
             k = 2
 
+        # model = "ER"
+        # strat = 2
+        # num_nodes = 10
+        # p = 0.1
+        # k = 2
+
+
         load_flag = 0 # int(input("Run(0) or Load(1) (default: 0): ") or "0")
-        numIterations = 200 #int(input("Iteration # (default: 200): ",) or "200")
+        numIterations = 50 #200 #int(input("Iteration # (default: 200): ",) or "200")
         payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
         saveRate = 1
         m = 3
@@ -139,7 +146,7 @@ if __name__ == '__main__':
         
         # Step 3. visualize
         
-        start = time.perf_counter()
+        # start = time.perf_counter()
         
         visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
@@ -147,6 +154,6 @@ if __name__ == '__main__':
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
         
         
-        print(f'time used to visualize: {time.perf_counter()-start}s \n')
+        # print(f'time used to visualize: {time.perf_counter()-start}s \n')
 
         # complexity_graph()

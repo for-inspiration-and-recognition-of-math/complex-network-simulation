@@ -194,6 +194,9 @@ class Simulation:
                         # Update node payoff history
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j], iterID)
 
+            adjMatrixBeforeChanging = adjMatrix.copy()
+            nodesDictOld = nodesDict.copy()  # create a copy for reference
+
             # break edges:
             for edge in brokenEdges:
                 stub1, stub2 = edge
@@ -215,13 +218,12 @@ class Simulation:
             adjMatrix = self.linkToNewNode(adjMatrix, excludingNodesIDDict, numNewEdgesToFormDict)
 
             # update nodes status
-            nodesDictOld = nodesDict  # create a copy for reference
             for nodeID in nodesDict.keys():
                 if strategy == 1:
                     nodesDict[nodeID] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[nodeID])
 
                 elif strategy == 2:
-                    nodeiNeighbors = [node for node, isNeighbor in zip(nodesDictOld.values(), adjMatrix[nodeID]) if isNeighbor]
+                    nodeiNeighbors = [node for node, isNeighbor in zip(nodesDictOld.values(), adjMatrixBeforeChanging[nodeID]) if isNeighbor]
                     nodesDict[nodeID] = self.updateNodesStatusBasedOnNeighborsInfo(nodesDictOld[nodeID], nodeiNeighbors)
 
             # update nodes punishment count
@@ -281,6 +283,9 @@ class Simulation:
                         # Update node payoff history
                         nodesDict[i], nodesDict[j] = self.updateWithGamePayoff(nodesDict[i], nodesDict[j], iterID)
 
+            adjMatrixBeforeChanging = adjMatrix.copy()
+            nodesDictOld = nodesDict.copy()  # create a copy for reference
+
             # get edges to form:
             nodesToConnectDict = {}
             for nodeID in set(nodesToFormNewEdge):
@@ -303,13 +308,12 @@ class Simulation:
                     adjMatrix[node][nodeID] = 1
 
             # update nodes status
-            nodesDictOld = nodesDict  # create a copy for reference
             for nodeID in nodesDict.keys():
                 if strategy == 3:
                     nodesDict[nodeID] = self.updateNodesStatusBasedOnLastPayoff(nodesDict[nodeID])
 
                 elif strategy == 4:
-                    nodeiNeighbors = [node for node, isNeighbor in zip(nodesDictOld.values(), adjMatrix[nodeID]) if isNeighbor]
+                    nodeiNeighbors = [node for node, isNeighbor in zip(nodesDictOld.values(), adjMatrixBeforeChanging[nodeID]) if isNeighbor]
                     nodesDict[nodeID] = self.updateNodesStatusBasedOnNeighborsInfo(nodesDictOld[nodeID], nodeiNeighbors)
 
             nodesDict_list.append(nodesDict)
