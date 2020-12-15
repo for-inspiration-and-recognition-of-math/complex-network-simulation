@@ -36,7 +36,6 @@ def all_measures( node_dict, adj, iteration, alpha = 0.9):
 	df.columns = ['Node']
 	df['iteration'] = iteration
 	df['status'] = pd.Series([val.status for val in node_dict.values()])
-
 	df['degree'] = pd.Series(nx.degree_centrality(G))
 	df['eigenvector'] = pd.Series(nx.eigenvector_centrality(G))
 	#df['katz'] = pd.Series(nx.katz_centrality(G))
@@ -88,21 +87,25 @@ def all_measures_master1(node_dict_list, adj_list, name ):
 		os.makedirs('analysis')
 	directory = os.path.dirname(__file__) + '/analysis' + '/centrality_values_' + name + '-'+ str(iterator) +  '.csv' 
 	master_df.to_csv(directory)
-	return master_df
+	return master_list
 
 def community_detection(node_dict_list, adj_list ):
-	master_df = pd.DataFrame()
+	iteration_list = []
 	it = 0
 	for node_dict, adj in zip(node_dict_list, adj_list):
+		id_status_list = []
 		G = nx.from_numpy_matrix(adj)
 		c = list(greedy_modularity_communities(G))
+
 		print('iteration:' + str(it))
 		for val in c:
-			print(sorted(val))
-			print([node_dict.get(item,item).status for item in sorted(val)])
-			print()
+			community = sorted(val)
+			community_status = [node_dict.get(item,item).status for item in sorted(val)]
+			id_status_list.append(community)
+			id_status_list.append(community_status)
+		iteration_list.append(id_status_list)
 		it = it +1
-	return 
+	return iteration_list
 
 
 def geodesic(adj):
