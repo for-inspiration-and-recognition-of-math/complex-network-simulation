@@ -16,11 +16,11 @@ def generate_network(type, num_nodes, num_subgraphs = 100, cooperator_proportion
 	elif type == 'karate':
 		return karate_clean(cooperator_proportion)
 	elif type == 'ER':
-		return generate_random_network(type, num_nodes , cooperator_proportion, p )
-	elif type == 'WS':
-		return generate_random_network(type, num_nodes, cooperator_proportion, p, k)
+		return generate_random_network(type, num_nodes , cooperator_proportion, p, seed = seed )
+	elif type == 'NWS':
+		return generate_random_network(type, num_nodes, cooperator_proportion, p, k, seed = seed)
 	elif type == 'BA':
-		return generate_random_network(type, num_nodes, cooperator_proportion,m)
+		return generate_random_network(type, num_nodes, cooperator_proportion,m, seed =seed)
 	else:
 		print("enter a valid network")
 
@@ -98,8 +98,8 @@ def generate_random_network(type, num_nodes , cooperator_proportion=0.5,  p =0.5
 	elif type == 'BA':
 		graph = nx.barabasi_albert_graph(num_nodes, m, seed = seed)
 		return node_dict, nx.to_numpy_array(graph)
-	elif type == 'WS':
-		graph = nx.watts_strogatz_graph(num_nodes, k, p, seed= seed)
+	elif type == 'NWS':
+		graph = nx.newman_watts_strogatz_graph(num_nodes, k, p, seed= seed)
 		return node_dict, nx.to_numpy_array(graph)
 	else:
 		return "Enter a valid graph type : ER, BA, or WS"
