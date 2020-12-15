@@ -95,23 +95,15 @@ if __name__ == '__main__':
         strat = int(input("Strat # (default: 3): ") or "3")
 
         if model == 'ER' or model =='WS' or model =='BA':
-            num_nodes = int(input("Node # (default: 200): ") or "200")
-            p = float(input("p (default: 0.05): ") or 0.05) if model == 'ER' or 'WS' else 0.05
-            k = int(input("k (default: 2): ") or 2) if model == 'WS' else 2
+            num_nodes = int(input("Node # (default: 1000): ") or "1000")
+            p = float(input("p (default: 0.1): ") or 0.1) if model == 'ER' or 'WS' else 0.1
         else:
             num_nodes = 200
-            p = 0.05
-            k = 2
+            p = 0.1
 
-        # model = "ER"
-        # strat = 2
-        # num_nodes = 10
-        # p = 0.1
-        # k = 2
-
-
+        k = 2
         load_flag = 0 # int(input("Run(0) or Load(1) (default: 0): ") or "0")
-        numIterations = 50 #200 #int(input("Iteration # (default: 200): ",) or "200")
+        numIterations = 200 #int(input("Iteration # (default: 200): ",) or "200")
         payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
         saveRate = 1
         m = 3
@@ -148,7 +140,7 @@ if __name__ == '__main__':
         
         # start = time.perf_counter()
         
-        visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
+        # visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
