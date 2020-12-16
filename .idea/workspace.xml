@@ -2,18 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="71486c9c-94a5-46e2-ada6-3edaba36d9f0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/output1.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/output2.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualization/evolution/ER+strat2--Evolution-Edges.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualization/evolution/ER+strat2-Evolution-Nodes.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cleaning.py" beforeDir="false" afterPath="$PROJECT_DIR$/cleaning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/game_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulations.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulations_updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/simulations_updated.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,8 +17,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cleaning.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="695">
-              <caret line="103" lean-forward="true" selection-start-line="103" selection-end-line="103" />
+            <state relative-caret-position="290">
+              <caret line="103" column="9" lean-forward="true" selection-start-line="103" selection-start-column="9" selection-end-line="103" selection-end-column="9" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -38,11 +29,15 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/simulations_updated.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-988">
-              <caret line="140" column="28" lean-forward="true" selection-start-line="140" selection-start-column="28" selection-end-line="140" selection-end-column="28" />
+            <state relative-caret-position="340">
+              <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
               <folding>
-                <element signature="e#3948#4350#0" />
-                <element signature="e#12289#13361#0" />
+                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#2867#4103#0" />
+                <element signature="e#5481#5551#0" />
+                <element signature="e#9835#10500#0" />
+                <element signature="e#9409#10103#0" />
+                <element signature="e#13158#14093#0" />
               </folding>
             </state>
           </provider>
@@ -51,11 +46,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game_main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="79" column="39" lean-forward="true" selection-start-line="79" selection-start-column="39" selection-end-line="79" selection-end-column="39" />
+            <state relative-caret-position="357">
+              <caret line="138" column="34" selection-start-line="138" selection-start-column="34" selection-end-line="138" selection-end-column="34" />
               <folding>
-                <element signature="e#0#27#0" expanded="true" />
-                <element signature="e#220#2600#0" />
+                <element signature="e#228#2606#0" />
+                <marker date="1608068853334" expanded="true" signature="3388:4259" ph="..." />
               </folding>
             </state>
           </provider>
@@ -71,6 +66,10 @@
       <find>adjMatrix_list</find>
       <find>adjMatrixNew</find>
       <find>gamePayoff</find>
+      <find>print</find>
+      <find>or</find>
+      <find>generate_node_dict</find>
+      <find>i</find>
     </findStrings>
     <replaceStrings>
       <replace>iterID</replace>
@@ -84,8 +83,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/cleaning.py" />
         <option value="$PROJECT_DIR$/simulations.py" />
+        <option value="$PROJECT_DIR$/cleaning.py" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_85.py" />
         <option value="$PROJECT_DIR$/simulations_updated.py" />
         <option value="$PROJECT_DIR$/game_main.py" />
       </list>
@@ -93,8 +93,9 @@
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
     <option name="x" value="1440" />
+    <option name="y" value="23" />
     <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="height" value="1057" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -109,6 +110,11 @@
               <item name="M168-simulation" type="b2602c69:ProjectViewProjectNode" />
               <item name="M168-simulation" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="M168-simulation" type="b2602c69:ProjectViewProjectNode" />
+              <item name="M168-simulation" type="462c0819:PsiDirectoryNode" />
+              <item name="visualization" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -118,6 +124,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -148,7 +155,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="game_main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="game_main" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true">
       <module name="M168-simulation" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -188,12 +195,12 @@
       <updated>1607062676663</updated>
       <workItem from="1607062683089" duration="832000" />
       <workItem from="1607289156895" duration="1087000" />
-      <workItem from="1607361002726" duration="6420000" />
+      <workItem from="1607361002726" duration="8112000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15526000" />
+    <option name="totallyTimeSpent" value="44420000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -208,13 +215,13 @@
     <frame x="1440" y="0" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.11081371" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12098501" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.15640767" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.11705348" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.3652876" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.22906156" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.1493441" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32996973" />
@@ -222,7 +229,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32996973" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Terminal" order="10" weight="0.32996973" />
-      <window_info anchor="bottom" id="Python Console" order="11" weight="0.20787084" />
+      <window_info anchor="bottom" id="Python Console" order="11" weight="0.3198789" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -241,59 +248,74 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/simulations_updated.py</url>
-          <line>227</line>
-          <option name="timeStamp" value="3" />
+          <line>383</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/simulations_updated.py</url>
+          <line>194</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/simulations_updated.py</url>
+          <line>411</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/M168_simulation$game_main.coverage" NAME="game_main Coverage Results" MODIFIED="1607368852819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/M168_simulation$game_main.coverage" NAME="game_main Coverage Results" MODIFIED="1608068970581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
       <expression>
-        <expression-string>node.lastPayoff</expression-string>
+        <expression-string>adjMatrix/10</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>node.nodeID</expression-string>
+        <expression-string>nodesDictOld[nodeID]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>node.status</expression-string>
+        <expression-string>nodeiNeighbors[0]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>initStatus</expression-string>
+        <expression-string>nodeiNeighbors</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>adjMatrix_list[0]</expression-string>
+        <expression-string>nodeID</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>adjMatrix_list</expression-string>
+        <expression-string>node2</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>adjMatrix_list.append(np.zeros((2,2)))</expression-string>
+        <expression-string>node1</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>adjMatrix_list.append(3)</expression-string>
+        <expression-string>nodesDict[1]</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
       <expression>
-        <expression-string>len(adjMatrix_list)</expression-string>
+        <expression-string>nodesDict[3]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>i</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -319,51 +341,86 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/M168-essay4.py">
+    <entry file="file://$PROJECT_DIR$/M168-essay4.py" />
+    <entry file="file://$PROJECT_DIR$/simulations_updated_new.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="17" column="18" lean-forward="true" selection-start-line="17" selection-start-column="18" selection-end-line="17" selection-end-column="18" />
+        <state relative-caret-position="440">
+          <caret line="22" column="28" lean-forward="true" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/visualization/ER+s4+p0 (node-histogram)/node-0.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/simulations.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="153" lean-forward="true" selection-start-line="153" selection-end-line="153" />
+        <state relative-caret-position="160">
+          <caret line="48" column="11" selection-start-line="48" selection-start-column="11" selection-end-line="48" selection-end-column="11" />
           <folding>
             <element signature="e#281#1388#0" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/lib/python3.7/site-packages/numpy/core/_methods.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="169" selection-start-line="169" selection-end-line="169" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/game_main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="138" column="34" selection-start-line="138" selection-start-column="34" selection-end-line="138" selection-end-column="34" />
+          <folding>
+            <element signature="e#228#2606#0" />
+            <marker date="1608068853334" expanded="true" signature="3388:4259" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cleaning.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="695">
-          <caret line="103" lean-forward="true" selection-start-line="103" selection-end-line="103" />
+        <state relative-caret-position="290">
+          <caret line="103" column="9" lean-forward="true" selection-start-line="103" selection-start-column="9" selection-end-line="103" selection-end-column="9" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game_main.py">
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_85.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="79" column="39" lean-forward="true" selection-start-line="79" selection-start-column="39" selection-end-line="79" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-            <element signature="e#220#2600#0" />
-          </folding>
+        <state relative-caret-position="400">
+          <caret line="20" column="44" selection-start-line="20" selection-start-column="44" selection-end-line="20" selection-end-column="44" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/simulations_updated.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-988">
-          <caret line="140" column="28" lean-forward="true" selection-start-line="140" selection-start-column="28" selection-end-line="140" selection-end-column="28" />
+        <state relative-caret-position="340">
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
           <folding>
-            <element signature="e#3948#4350#0" />
-            <element signature="e#12289#13361#0" />
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#2867#4103#0" />
+            <element signature="e#5481#5551#0" />
+            <element signature="e#9835#10500#0" />
+            <element signature="e#9409#10103#0" />
+            <element signature="e#13158#14093#0" />
           </folding>
         </state>
       </provider>
