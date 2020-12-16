@@ -420,24 +420,25 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
         num_nodes = len(nodesDict_list[0])
         
         # non-discriminant list storage
-        node_status_history =  [ [] for i in range(num_nodes) ]
-        node_degree_history =  [ [] for i in range(num_nodes) ]
-        node_eigenvector_history =  [ [] for i in range(num_nodes) ]
-        node_pagerank_history =  [ [] for i in range(num_nodes) ]
-        node_local_clustering_history =  [ [] for i in range(num_nodes) ]
+        node_status_history =  [ [] for i in range(num_iteration) ]
+        node_degree_history =  [ [] for i in range(num_iteration) ]
+        node_eigenvector_history =  [ [] for i in range(num_iteration) ]
+        node_katz_history =  [ [] for i in range(num_iteration) ]
+        node_pagerank_history =  [ [] for i in range(num_iteration) ]
+        node_local_clustering_history =  [ [] for i in range(num_iteration) ]
         
         # specific list storage
         good_node_degree_avg = []
         good_node_eigenvector_avg = []
+        good_node_katz_avg = []
         good_node_pagerank_avg = []
         good_node_local_clustering_avg = []
         
         bad_node_degree_avg = []
         bad_node_eigenvector_avg = []
+        bad_node_katz_avg = []
         bad_node_pagerank_avg = []
         bad_node_local_clustering_avg = []
-        
-        path = creat_dir("dataframe", catagory="test")
         
         # building non-discriminant lists
         for i in range(num_iteration):
@@ -448,14 +449,15 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
                         node_status_history[i].append(node[2])
                         node_degree_history[i].append(node[3])
                         node_eigenvector_history[i].append(node[4])
-                        node_pagerank_history[i].append(node[5])
-                        node_local_clustering_history[i].append(node[6])
+                        node_katz_history[i].append(node[5])
+                        node_pagerank_history[i].append(node[6])
+                        node_local_clustering_history[i].append(node[7])
         
         
         # building specific lists used for plotting
         for i in range (num_iteration):
-                good_degree_sum, good_eigenvector_sum, good_pagerank_sum, good_local_clustering_sum = 0, 0, 0, 0
-                bad_degree_sum, bad_eigenvector_sum, bad_pagerank_sum, bad_local_clustering_sum = 0, 0, 0, 0
+                good_degree_sum, good_eigenvector_sum, good_katz_sum, good_pagerank_sum, good_local_clustering_sum = 0, 0, 0, 0, 0 
+                bad_degree_sum, bad_eigenvector_sum, bad_katz_sum,bad_pagerank_sum, bad_local_clustering_sum = 0, 0, 0, 0, 0
                 num_bad_nodes = sum(node_status_history[i]) if sum(node_status_history[i]) > 0 else 1   # since the top would also be equal to 1
                 num_good_nodes = num_nodes - num_bad_nodes if num_nodes - num_bad_nodes > 0 else 1      # same logic
                 
@@ -463,39 +465,45 @@ def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolutio
                         if node_status_history[i][j] == 0:
                                 good_degree_sum += node_degree_history[i][j]
                                 good_eigenvector_sum += node_eigenvector_history[i][j]
+                                good_katz_sum += node_katz_history[i][j]
                                 good_pagerank_sum += node_pagerank_history[i][j]
                                 good_local_clustering_sum += node_local_clustering_history[i][j]
                         elif node_status_history[i][j] == 1:    # this explicit if statement is for logical clarity
                                 bad_degree_sum += node_degree_history[i][j]
                                 bad_eigenvector_sum += node_eigenvector_history[i][j]
+                                bad_katz_sum += node_katz_history[i][j]
                                 bad_pagerank_sum += node_pagerank_history[i][j]
                                 bad_local_clustering_sum += node_local_clustering_history[i][j]
                                 
                 good_node_degree_avg.append(good_degree_sum / num_good_nodes)
                 good_node_eigenvector_avg.append(good_eigenvector_sum / num_good_nodes)
+                good_node_katz_avg.append(good_katz_sum / num_good_nodes)
                 good_node_pagerank_avg.append(good_pagerank_sum / num_good_nodes)
                 good_node_local_clustering_avg.append(good_local_clustering_sum / num_good_nodes)
                 
                 bad_node_degree_avg.append(bad_degree_sum / num_bad_nodes)
                 bad_node_eigenvector_avg.append(bad_eigenvector_sum / num_bad_nodes)
+                bad_node_katz_avg.append(bad_katz_sum / num_bad_nodes)
                 bad_node_pagerank_avg.append(bad_pagerank_sum / num_bad_nodes)
                 bad_node_local_clustering_avg.append(bad_local_clustering_sum / num_bad_nodes)
         
 
         x = [ x for x in range(num_iteration)]		# just indexing iterations counts
-        g1, g2, g3, g4 = good_node_degree_avg, good_node_eigenvector_avg, good_node_pagerank_avg, good_node_local_clustering_avg
-        b1, b2, b3, b4 = bad_node_degree_avg, bad_node_eigenvector_avg, bad_node_pagerank_avg, bad_node_local_clustering_avg
+        g1, g2, g3, g4, g5 = good_node_degree_avg, good_node_eigenvector_avg, good_node_katz_avg, good_node_pagerank_avg, good_node_local_clustering_avg
+        b1, b2, b3, b4, b5 = bad_node_degree_avg, bad_node_eigenvector_avg, bad_node_katz_avg, bad_node_pagerank_avg, bad_node_local_clustering_avg
         
         plt.figure(figsize=(20, 15), dpi=80, facecolor='w', edgecolor='k', linewidth=1)
         
         plt.plot(x, g1, '-o', color=color[0], markersize=10, label="good degree")
         plt.plot(x, g2, '--^', color=color[0], markersize=10, label="good eigenvector")
-        plt.plot(x, g3, '-.x', color=color[0], markersize=10, label="good pagerank")
-        plt.plot(x, g4, ':v', color=color[0], markersize=10, label="good local clustering")
+        plt.plot(x, g3, '-d', color=color[0], markersize=10, label="good katz")
+        plt.plot(x, g4, '-.x', color=color[0], markersize=10, label="good pagerank")
+        plt.plot(x, g5, ':v', color=color[0], markersize=10, label="good local clustering")
         plt.plot(x, b1, '-o', color=color[1], markersize=10, label="bad degree")
         plt.plot(x, b2, '--^', color=color[1], markersize=10, label="bad eigenvector")
-        plt.plot(x, b3, '-.x', color=color[1], markersize=10, label="bad pagerank")
-        plt.plot(x, b4, ':v', color=color[1], markersize=10, label="bad local clustering")
+        plt.plot(x, b3, '-d', color=color[1], markersize=10, label="bad katz")
+        plt.plot(x, b4, '-.x', color=color[1], markersize=10, label="bad pagerank")
+        plt.plot(x, b5, ':v', color=color[1], markersize=10, label="bad local clustering")
         
         plt.xlabel('Iteration #', fontsize=15)
         plt.ylabel('Measurements', fontsize=15)
