@@ -102,8 +102,8 @@ if __name__ == '__main__':
             p = 0.1
 
         k = 2
-        load_flag = 0 # int(input("Run(0) or Load(1) (default: 0): ") or "0")
-        numIterations = 200 #int(input("Iteration # (default: 200): ",) or "200")
+        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
+        numIterations = int(input("Iteration # (default: 5): ",) or "5")
         payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
         saveRate = 1
         m = 3
@@ -124,23 +124,28 @@ if __name__ == '__main__':
         else:
             fileName = '{}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, strat, payoff, saveRate, numIterations)
 
-
+        start = time.perf_counter()
+        
         if load_flag:
             nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
         else:
             simulation = Simulation(numIterations, saveRate, strat, payoff, fileName)
             nodes_list, adj_list = simulation(nodes, adj)
+            print(f'time used to simulate: {time.perf_counter()-start}s')
+        
+        # Step 3. run all measurements
+        start = time.perf_counter()
+        measures_list = all_measures_master(nodes_list, adj_list, "{0}+s{1}+p{2}".format(model, strat, payoff))
+        community_detection_list = community_detection(nodes_list, adj_list)
+        
+        print(f'time used to calculate measures: {time.perf_counter()-start}s')
         
         
-        print(f'time used to simulate: {time.perf_counter()-start}s')
-        
-        
-        
-        # Step 3. visualize
+        # Step 4. Visualize
         
         # start = time.perf_counter()
         
-        # visualize_list(nodes_list, adj_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
+        visualize(nodes_list, adj_list, measures_list, community_detection_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
          # 5th parameter (defaulted to True) means position is LOCKED for future iteration
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)

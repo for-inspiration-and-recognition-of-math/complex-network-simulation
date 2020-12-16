@@ -4,6 +4,9 @@ from cleaning import *
 import pandas as pd
 from networkx.algorithms.community import greedy_modularity_communities
 import os 
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+import itertools
 
 
 def centrality(adj , node_dict, type):
@@ -26,6 +29,7 @@ def centrality(adj , node_dict, type):
 
 
 def all_measures( node_dict, adj, iteration, alpha = 0.9):
+	#pool = mp.Pool(mp.cpu_count())
 	G = nx.convert_matrix.from_numpy_matrix(adj)
 
 	df = pd.DataFrame.from_dict(node_dict, orient = 'index')
@@ -34,40 +38,57 @@ def all_measures( node_dict, adj, iteration, alpha = 0.9):
 	df['status'] = pd.Series([val.status for val in node_dict.values()])
 	df['degree'] = pd.Series(nx.degree_centrality(G))
 	df['eigenvector'] = pd.Series(nx.eigenvector_centrality(G))
-	df['katz'] = pd.Series(nx.katz_centrality(G))
-	df['closeness'] = pd.Series(nx.closeness_centrality(G))
-	df['betweenness'] = pd.Series(nx.betweenness_centrality(G))
+	#df['katz'] = pd.Series(nx.katz_centrality(G))
+	#df['closeness'] = pd.Series(nx.closeness_centrality(G))
+	#df['betweenness'] = pd.Series(nx.betweenness_centrality(G))
 	df['pagerank'] = pd.Series(nx.pagerank(G, alpha))
 	df['local_clustering_coefficients'] = pd.Series(nx.clustering(G))
 
 	return( df)
 
-def all_measures_master(node_dict_list, adj_list ):
+def all_measures_master(node_dict_list, adj_list, name ):
 	master_df = pd.DataFrame()
-	it = 0
-	for node_dict, adj in zip(node_dict_list, adj_list):
-		values = all_measures(node_dict, adj, it, 0.9)
-		master_df = pd.concat([master_df, values])
-		it = it +1
+	master_list = []
+	it = range(0, len(adj_list))
+	f_list = []
+	with concurrent.futures.ProcessPoolExecutor() as executor:
+		for node_dict, adj, iterator in zip(node_dict_list, adj_list, it):
+			f = executor.submit(all_measures, node_dict, adj, iterator)
+			f_list.append(f)
+			print(iterator, end=' ')
+			#values = all_measures(node_dict,adj,iterator,0.9)
+		print()
+		it = 0
+		for f in f_list:
+			print(it, end=' ')
+			master_df = pd.concat([master_df, f.result()])
+			master_list.append(f.result())
+			it = it+1
+
 	if not os.path.exists('analysis'):
 		os.makedirs('analysis')
-	directory = os.path.dirname(__file__) + '/analysis' + '/centrality_values.csv'
+	directory = os.path.dirname(__file__) + '/analysis' + '/centrality_values_' + name + '-'+ str(iterator) +  '.csv' 
 	master_df.to_csv(directory)
-	return master_df
+	return master_list
 
 def community_detection(node_dict_list, adj_list ):
-	master_df = pd.DataFrame()
+	iteration_list = []
 	it = 0
+	print('iteration:', end=' ') 
 	for node_dict, adj in zip(node_dict_list, adj_list):
+		id_status_list = []
 		G = nx.from_numpy_matrix(adj)
 		c = list(greedy_modularity_communities(G))
-		print('iteration:' + str(it))
+
+		print(str(it), end=' ')
 		for val in c:
-			print(sorted(val))
-			print([node_dict.get(item,item).status for item in sorted(val)])
-			print()
+			community = sorted(val)
+			community_status = [node_dict.get(item,item).status for item in sorted(val)]
+			id_status_list.append(community)
+			id_status_list.append(community_status)
+		iteration_list.append(id_status_list)
 		it = it +1
-	return 
+	return iteration_list
 
 
 def geodesic(adj):
@@ -78,10 +99,4 @@ def average_clustering_coefficient(adj):
 	G = nx.convert_matrix.from_numpy_matrix(adj)
 	return nx.average_clustering(G)
 
-
-if __name__ == '__main__':
-	model = 'BA'
-	num_nodes = 15
-	nodes, adj = generate_network(model, num_nodes, p=0.9)
-	print(all_measures(nodes, adj))
 

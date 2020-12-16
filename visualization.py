@@ -34,7 +34,7 @@ from tqdm import tqdm
 '''
 
 # global variables
-color = ['#03b500', '#b52a00', "#077d11", "#ffbb3d", "#db0231"] # (green-red color scheme)
+color_rg = ['#03b500', '#b52a00', "#077d11", "#ffbb3d", "#db0231"] # (green-red color scheme)
 # node colors [0,1] : green, red (orangish), 
 # edge colors [2,3,4] : dark green, orange(leaning yellow), red (leaning magenta)
 color = ['#0d009c', '#9e1500', "#68d7ed", "#f0c059", "#f27461"]         # alternate (blue-red) color scheme
@@ -47,6 +47,12 @@ good_good_edges_list, mixed_edges_list, bad_bad_edges_list = {}, {}, {}
 # no these are not misnomers, they will eventually be sorted into lists
 
 optimized_pos, position_set, done_flag = False, False, False            #setting position variables
+
+# visualization options
+network_histogram_flag = 1              
+gif_flag = 1
+line_scatter_plot_flag = 1
+plot_3d_flag = 1
 
 # helper function: create directory if not already exists
 def creat_dir(folder_name, catagory="visualization"):
@@ -257,6 +263,10 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         dots = Dots()
         dots.start()
         
+        #--------------# 
+        # 1. graph node type evolution 
+        #--------------#
+        
         num_defect = []
         num_nodes = len(nodesDict_list[0])
         for nodeDict in nodesDict_list:
@@ -295,7 +305,10 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         plt.close()
         dots.stop()
         
-        ##### graph edge type evolution #####
+        
+        #--------------# 
+        # 2. graph edge type evolution 
+        #--------------#
         
         print('Plotting edge type evolution', flush=True)
         dots.start()
@@ -336,7 +349,9 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         dots.stop()
         
         
-        ##### wealth vs avg state scatter plot #####
+        #--------------# 
+        # 3. wealth vs avg state scatter plot 
+        #--------------#
         
         print('Plotting Gains vs State', flush=True)
         dots.start()
@@ -381,7 +396,7 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
 
         plt.savefig(path_evolution + model_name + "--Wealth-to-Status(1).png", format="PNG")
         
-        # generate another with fixed x-scale (better for comparison)
+        ### generate another with fixed x-scale (better for comparison) ###
         plt.xlim(-0.05, 1.05)
         plt.plot([0.5, 0.5], [lower_bound, upper_bound], 'k-', lw=1,dashes=[2, 2])      # 50% reference line
         plt.title("Gain per iteration VS Average State for All Nodes (static scale)", fontsize=20)
@@ -390,38 +405,145 @@ def plot_status_over_time(nodesDict_list, model_name, path_evolution, good_good_
         plt.close()
         dots.stop()
         print()
+
+
+def centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list, community_detection_list):
+        #--------------#
+        # 4. graphing properties in analysis.py (centralities, mean geodesic distance, clustering coefficient) #
+        #       Extension of above function
+        #--------------#
+        
+        labels = ['degree', 'eigenvector', 'katz', 'closeness', 'betweeness', 'avg geodesic']
+        results = [{}]
+                
+        num_iteration = len(nodesDict_list)
+        num_nodes = len(nodesDict_list[0])
+        
+        # non-discriminant list storage
+        node_status_history =  [ [] for i in range(num_nodes) ]
+        node_degree_history =  [ [] for i in range(num_nodes) ]
+        node_eigenvector_history =  [ [] for i in range(num_nodes) ]
+        node_pagerank_history =  [ [] for i in range(num_nodes) ]
+        node_local_clustering_history =  [ [] for i in range(num_nodes) ]
+        
+        # specific list storage
+        good_node_degree_avg = []
+        good_node_eigenvector_avg = []
+        good_node_pagerank_avg = []
+        good_node_local_clustering_avg = []
+        
+        bad_node_degree_avg = []
+        bad_node_eigenvector_avg = []
+        bad_node_pagerank_avg = []
+        bad_node_local_clustering_avg = []
+        
+        path = creat_dir("dataframe", catagory="test")
+        
+        # building non-discriminant lists
+        for i in range(num_iteration):
+                measures_dataframe = measures_list[i]
+                matrix = measures_dataframe.to_numpy()
+        
+                for node in matrix:
+                        node_status_history[i].append(node[2])
+                        node_degree_history[i].append(node[3])
+                        node_eigenvector_history[i].append(node[4])
+                        node_pagerank_history[i].append(node[5])
+                        node_local_clustering_history[i].append(node[6])
+        
+        
+        # building specific lists used for plotting
+        for i in range (num_iteration):
+                good_degree_sum, good_eigenvector_sum, good_pagerank_sum, good_local_clustering_sum = 0, 0, 0, 0
+                bad_degree_sum, bad_eigenvector_sum, bad_pagerank_sum, bad_local_clustering_sum = 0, 0, 0, 0
+                num_bad_nodes = sum(node_status_history[i]) if sum(node_status_history[i]) > 0 else 1   # since the top would also be equal to 1
+                num_good_nodes = num_nodes - num_bad_nodes if num_nodes - num_bad_nodes > 0 else 1      # same logic
+                
+                for j in range (num_nodes):
+                        if node_status_history[i][j] == 0:
+                                good_degree_sum += node_degree_history[i][j]
+                                good_eigenvector_sum += node_eigenvector_history[i][j]
+                                good_pagerank_sum += node_pagerank_history[i][j]
+                                good_local_clustering_sum += node_local_clustering_history[i][j]
+                        elif node_status_history[i][j] == 1:    # this explicit if statement is for logical clarity
+                                bad_degree_sum += node_degree_history[i][j]
+                                bad_eigenvector_sum += node_eigenvector_history[i][j]
+                                bad_pagerank_sum += node_pagerank_history[i][j]
+                                bad_local_clustering_sum += node_local_clustering_history[i][j]
+                                
+                good_node_degree_avg.append(good_degree_sum / num_good_nodes)
+                good_node_eigenvector_avg.append(good_eigenvector_sum / num_good_nodes)
+                good_node_pagerank_avg.append(good_pagerank_sum / num_good_nodes)
+                good_node_local_clustering_avg.append(good_local_clustering_sum / num_good_nodes)
+                
+                bad_node_degree_avg.append(bad_degree_sum / num_bad_nodes)
+                bad_node_eigenvector_avg.append(bad_eigenvector_sum / num_bad_nodes)
+                bad_node_pagerank_avg.append(bad_pagerank_sum / num_bad_nodes)
+                bad_node_local_clustering_avg.append(bad_local_clustering_sum / num_bad_nodes)
+        
+
+        x = [ x for x in range(num_iteration)]		# just indexing iterations counts
+        g1, g2, g3, g4 = good_node_degree_avg, good_node_eigenvector_avg, good_node_pagerank_avg, good_node_local_clustering_avg
+        b1, b2, b3, b4 = bad_node_degree_avg, bad_node_eigenvector_avg, bad_node_pagerank_avg, bad_node_local_clustering_avg
+        
+        plt.figure(figsize=(20, 15), dpi=80, facecolor='w', edgecolor='k', linewidth=1)
+        
+        plt.plot(x, g1, '-o', color=color[0], markersize=10, label="good degree")
+        plt.plot(x, g2, '--^', color=color[0], markersize=10, label="good eigenvector")
+        plt.plot(x, g3, '-.x', color=color[0], markersize=10, label="good pagerank")
+        plt.plot(x, g4, ':v', color=color[0], markersize=10, label="good local clustering")
+        plt.plot(x, b1, '-o', color=color[1], markersize=10, label="bad degree")
+        plt.plot(x, b2, '--^', color=color[1], markersize=10, label="bad eigenvector")
+        plt.plot(x, b3, '-.x', color=color[1], markersize=10, label="bad pagerank")
+        plt.plot(x, b4, ':v', color=color[1], markersize=10, label="bad local clustering")
+        
+        plt.xlabel('Iteration #', fontsize=15)
+        plt.ylabel('Measurements', fontsize=15)
+        plt.title("Measurements over iterations", fontsize=20)
+        plt.grid(True, axis='x')
+
+        plt.legend()
+        plt.savefig(path_evolution + model_name + "--Analysis.png", format="PNG")
+        plt.close()
         
         
         #--------------#
-        # graphing properties in analysis.py (centralities, mean geodesic distance, clustering coefficient) #
+        # 5. community detection in analysis.py
         #--------------#
-        # '''
-        #         # grabbing all measures (somehow... we'll sort that out later)
-        #         # also take average centrality? or just node
-        #         # NOTE: are nodes returns by centrality measure in the same order as the nodes from our Nodes list?
-        # labels = ['degree', 'eigenvector', 'katz', 'closeness', 'betweeness', 'avg geodesic']
-        # results = [{}]
-
-        # collected = zip(results, labels)
-
-        # plt.figure(figsize=(20, 15), dpi=80, facecolor='w', edgecolor='k')
-        # for y, label in collected:
-        #         plt.plot(x, y, '-o', label=label)
-
-        # # plotting reference lines (.25, .5, .75)
-        # plt.plot([-1, len(iteration_count)], [0.5, 0.5], 'k-', lw=1,dashes=[2, 2])
-        # plt.plot([-1, len(iteration_count)], [0.25, 0.25], 'k-', lw=1,dashes=[2, 2])
-        # plt.plot([-1, len(iteration_count)], [0.75, 0.75], 'k-', lw=1,dashes=[2, 2])
-        # # plt.ylim(0, 1)
         
-        # plt.xlabel('Iteration #')
-        # plt.ylabel('What is this scale???')
-        # plt.title("Analysis calculations over iterations")
+        node_avg_status = [ [] for _ in range (num_iteration) ]
+        community_size = [ [] for _ in range (num_iteration) ]
+        
+        for i in range (num_iteration):
+                cur_community = community_detection_list[i]
+                for j in range (1, len(cur_community), 2):	# just taking status list
+                        node_avg_status[i].append(mean(cur_community[j]))
+                        community_size[i].append(len(cur_community[j]))
+        
+        
+        x = [ [i]*len(node_avg_status[i]) for i in range (len(node_avg_status)) ]  # for plotting purposes
+        y = node_avg_status
+        z = []
+        for iteration in community_size:
+                z.append([size*100 for size in iteration])
+                
+        
+        plt.figure(figsize=(20, 15), dpi=80, facecolor='w', edgecolor='k', linewidth=1)
+        for i in range (len(node_avg_status)):
+                plt.scatter(x[i], y[i], s=z[i], alpha=0.4)
+        
+        plt.xlabel('Iteration #', fontsize=15)
+        plt.ylabel('Average Status of Community', fontsize=15)
+        plt.title("Community Formations over # iterations", fontsize=20)
+        
+        plt.plot([-0.5, num_iteration-0.5], [0.5, 0.5], 'k-', lw=1,dashes=[2, 2])
+        plt.ylim(-0.05, 1.05)
+        plt.grid(True)
 
-        # plt.legend()
-        # plt.savefig(path_evolution + model_name + "--Analysis.png", format="PNG")
-        # plt.close()
-        # '''
+        plt.savefig(path_evolution + model_name + "--Community.png", format="PNG")
+        plt.close()
+        
+
 
 # '''
 # func generate_gif
@@ -471,17 +593,18 @@ def generate_gif(model_name, input_path, output_path):
 '''
 # (i.e the only function you need read) 
 
-'''INTERFACE (i.e. the only function you need to use): 
+'''INTERFACE (i.e. the only function you need to read): 
         if input is a list of node lists and list of adj matricies, 
         outputs graph given folder_name and generates gif
-        4th parameter (model name) is for bookkeeping purposes
-        5th parameter (defaulted to True) means position is LOCKED for future iteration 
-        6th parameter (continuation=False) set to true if continuing a previous simulation using pickled data
+        5th parameter (model name) is for bookkeeping purposes
+        6th parameter (defaulted to True) means position is LOCKED for future iteration 
+        7th parameter (continuation=False) set to true if continuing a previous simulation using pickled data
         choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)'''
+
+@commandline_decorator    
+def visualizer_spawner(nodesDict_list, adjMatrix_list, measures_list, community_detection_list, iterations, model_name, pos_lock=True, continuation=False):
+        global network_histogram_flag, gif_flag, line_scatter_plot_flag, plot_3d_flag
         
-@commandline_decorator
-def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_lock=True, continuation=False):
-        print("\nSpawning demons...")
         # create directories and generate correct absolute path name
         path_network, path_node_histogram, path_edge_histogram, path_animation, path_evolution = creat_dir(model_name + " (network)"), creat_dir(model_name + " (node-histogram)"), creat_dir(model_name + " (edge-histogram)"), creat_dir("animation"), creat_dir("evolution")
         
@@ -490,80 +613,114 @@ def visualize_list(nodesDict_list, adjMatrix_list, iterations, model_name, pos_l
                 for root, dirs, files in os.walk(model_path, onerror=lambda err: print("OSwalk error: " + repr(err))):
                         for file in files:
                                 os.remove(os.path.join(root, file))
-        
-        # ---------------------------------------------------------
-        # generating graphs using multiple subprocesses 
-        #       (use previous releases for non-concurrent version)
-        # ---------------------------------------------------------
-        
-        # 1. Instantiate node positions of graphs before iterations for optimized position
-        G = nx.convert_matrix.from_numpy_matrix(adjMatrix_list[0])
-        global optimized_pos, position_set
-        if pos_lock:
-                if not position_set:
-                        optimized_pos = nx.spring_layout(G, threshold=1e-5, iterations=100)     # increased node distribution accuracy
-                        position_set = True
-        else: optimized_pos = nx.spring_layout(G)  
-        # optimized_pos = nx.shell_layout(G) / nx.spiral_layout(G) / nx.spectral_layout(G)
-        
-        global good_good_edges_list, mixed_edges_list, bad_bad_edges_list
-        runs = []
+                                
+        # generate all network graphs + histogram
+        if network_histogram_flag:
 
-        def update_bar(pbar, total):
-                cur = 0
-                while len(runs) < total:
-                        x_sync = len(runs)
-                        pbar.update(x_sync - cur)
-                        cur=x_sync
-                pbar.update(len(runs) - cur)
+                print("\nSpawning demons...")                
+                # ---------------------------------------------------------
+                # generating graphs using multiple subprocesses 
+                #       (use previous releases for non-concurrent version)
+                # ---------------------------------------------------------
+                
+                # 1. Instantiate node positions of graphs before iterations for optimized position
+                G = nx.convert_matrix.from_numpy_matrix(adjMatrix_list[0])
+                global optimized_pos, position_set
+                if pos_lock:
+                        if not position_set:
+                                optimized_pos = nx.spring_layout(G, threshold=1e-5, iterations=100)     # increased node distribution accuracy
+                                position_set = True
+                else: optimized_pos = nx.spring_layout(G)  
+                # optimized_pos = nx.shell_layout(G) / nx.spiral_layout(G) / nx.spectral_layout(G)
+                
+                global good_good_edges_list, mixed_edges_list, bad_bad_edges_list
+                runs = []
 
-        
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-                pbar = tqdm(total = iterations+1, unit='graphs')
-                
-                t1 = threading.Thread(target=update_bar, args=[pbar, iterations+1])
-                t1.start()
-                
-                for i in range(0, iterations + 1):
-                        f = executor.submit(visualization, nodesDict_list[i], adjMatrix_list[i], optimized_pos, 
-                                        path_network, path_node_histogram, path_edge_histogram, i, pos_lock)
-                        f.add_done_callback(lambda x: print(f'{x.result()[0]} ', end='', flush=True))
-                        runs.append(f)
+                def update_bar(pbar, total):
+                        cur = 0
+                        while len(runs) < total:
+                                x_sync = len(runs)
+                                pbar.update(x_sync - cur)
+                                cur=x_sync
+                        pbar.update(len(runs) - cur)
 
-                t1.join()
-                pbar.close()
-                print("all demons queued, waiting to complete...\n\nRunning graph generations... \n>", end = ' ', flush=True)
                 
-                
-                for run in concurrent.futures.as_completed(runs):
-                        index = run.result()[0]
-                        good_good_edges_list[index] = run.result()[1]
-                        mixed_edges_list[index] = run.result()[2]
-                        bad_bad_edges_list[index] = run.result()[3]
-                print("\n<--- all demons returned safely to tartarus --->")
-        
-        ### convert from dictionary into lists sorted by dictionary key ###
+                with concurrent.futures.ProcessPoolExecutor() as executor:
+                        pbar = tqdm(total = iterations+1, unit='graphs')
+                        
+                        t1 = threading.Thread(target=update_bar, args=[pbar, iterations+1])
+                        t1.start()
+                        
+                        for i in range(0, iterations + 1):
+                                f = executor.submit(visualization, nodesDict_list[i], adjMatrix_list[i], optimized_pos, 
+                                                path_network, path_node_histogram, path_edge_histogram, i, pos_lock)
+                                f.add_done_callback(lambda x: print(f'{x.result()[0]} ', end='', flush=True))
+                                runs.append(f)
 
-        good_good_edges_list = sorted(good_good_edges_list.items())     # coverts into sorted tuples
-        good_good_edges_list = [ x[1] for x in good_good_edges_list ]    # converts into lists of lists (removes the index => tuple[0])
-        
-        mixed_edges_list = sorted(mixed_edges_list.items())     
-        mixed_edges_list = [ x[1] for x in mixed_edges_list ] 
-        
-        bad_bad_edges_list = sorted(bad_bad_edges_list.items())     
-        bad_bad_edges_list = [ x[1] for x in bad_bad_edges_list ] 
+                        t1.join()
+                        pbar.close()
+                        print("all demons queued, waiting to complete...\n\nRunning graph generations... \n>", end = ' ', flush=True)
+                        
+                        
+                        for run in concurrent.futures.as_completed(runs):
+                                index = run.result()[0]
+                                good_good_edges_list[index] = run.result()[1]
+                                mixed_edges_list[index] = run.result()[2]
+                                bad_bad_edges_list[index] = run.result()[3]
+                        print("\n<--- all demons returned safely to tartarus --->")
+                
+                ### convert from dictionary into lists sorted by dictionary key ###
+
+                good_good_edges_list = sorted(good_good_edges_list.items())     # coverts into sorted tuples
+                good_good_edges_list = [ x[1] for x in good_good_edges_list ]    # converts into lists of lists (removes the index => tuple[0])
+                
+                mixed_edges_list = sorted(mixed_edges_list.items())     
+                mixed_edges_list = [ x[1] for x in mixed_edges_list ] 
+                
+                bad_bad_edges_list = sorted(bad_bad_edges_list.items())     
+                bad_bad_edges_list = [ x[1] for x in bad_bad_edges_list ] 
         
         
         # compile PNGs into gif (for both network and histogram)
-        print("\nCompiling GIF...")
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #         executor.submit(generate_gif, model_name + " (network)", path_network, path_animation)
-        #         executor.submit(generate_gif, model_name + " (edge-histogram)", path_edge_histogram, path_animation)
-        #         executor.submit(generate_gif, model_name + " (node-histogram)", path_node_histogram, path_animation)
+        if gif_flag:
+                print("\nCompiling GIF...")
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                        executor.submit(generate_gif, model_name + " (network)", path_network, path_animation)
+                        executor.submit(generate_gif, model_name + " (edge-histogram)", path_edge_histogram, path_animation)
+                        executor.submit(generate_gif, model_name + " (node-histogram)", path_node_histogram, path_animation)
         
-        # # generating graph over time for node status + edge type
-        plot_status_over_time(nodesDict_list, model_name, path_evolution, 
-                              good_good_edges_list, mixed_edges_list, bad_bad_edges_list, )
+        # generating graph over time for node status + edge type
+        if line_scatter_plot_flag:
+                plot_status_over_time(nodesDict_list, model_name, path_evolution, 
+                                good_good_edges_list, mixed_edges_list, bad_bad_edges_list)
+        
+        # generating graph of all measures (3D)
+        if plot_3d_flag:
+                centrality_plot_3d(nodesDict_list, adjMatrix_list, model_name, path_evolution, measures_list, community_detection_list)
+                
+        
 
 
 ''' <------------ Section 3 END ------------> '''
+
+
+
+''' 
+------------> ------------> ------------> ------------> ------------>
+                Section 4: Meta API (testing)
+------------> ------------> ------------> ------------> ------------>
+'''
+# the function to enable modular testing
+# set the flags to activate specific visualizations to be generated
+
+def visualize(*args, **kwargs):
+        global network_histogram_flag, gif_flag, line_scatter_plot_flag, plot_3d_flag
+        network_histogram_flag = 1
+        gif_flag = 1
+        line_scatter_plot_flag = 1
+        plot_3d_flag = 1
+        
+        visualizer_spawner(*args, **kwargs)
+        
+
+''' <------------ Section 4 END ------------> '''
