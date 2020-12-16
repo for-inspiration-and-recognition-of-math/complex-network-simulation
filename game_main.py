@@ -89,36 +89,49 @@ def load_data(strat, payoff, saveRate):
 
 
 if __name__ == '__main__':
-        
-        
-        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
-        num_nodes = int(input("Node # (default: 200): ") or "200")
-        numIterations = int(input("Iteration # (default: 5): ",) or "5")
+        start = time.perf_counter()
+
         model = str(input("Model (default: ER): ") or "ER")
         strat = int(input("Strat # (default: 3): ") or "3")
-        payoff = int(input("Payoff # (default: 0): ") or "0")
-        saveRate = int(input("Saverate # (default: 1): ") or "1")
-        
+
+        if model == 'ER' or model =='WS' or model =='BA':
+            num_nodes = int(input("Node # (default: 1000): ") or "1000")
+            p = float(input("p (default: 0.1): ") or 0.1) if model == 'ER' or 'WS' else 0.1
+        else:
+            num_nodes = 200
+            p = 0.1
+
+        k = 2
+        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
+        numIterations = int(input("Iteration # (default: 5): ",) or "5")
+        payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
+        saveRate = 1
+        m = 3
         
         # Step 1. generate network
-        nodes, adj = generate_random_network(model, num_nodes, p=0.2)
+        nodes, adj = generate_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
         # nodes, adj = facebook_clean()
         # nodes, adj = karate_clean()
         
         
         # Step 2. run simulation
+        if model == 'ER':
+            fileName = '{}_n={}_p={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, p, strat, payoff, saveRate, numIterations)
+        elif model == 'WS':
+            fileName = '{}_n={}_p={}_k={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, p, k, strat, payoff, saveRate, numIterations)
+        elif model == 'BA':
+            fileName = '{}_n={}_m={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, m, strat, payoff, saveRate, numIterations)
+        else:
+            fileName = '{}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, strat, payoff, saveRate, numIterations)
+
         start = time.perf_counter()
         
         if load_flag:
-                nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
+            nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
         else:
-                simulation = Simulation(numIterations, saveRate, strat, payoff) # choose from 0, 1, 2
-                nodes_list, adj_list = simulation(nodes, adj)
-                print(f'time used to simulate: {time.perf_counter()-start}s')
-        
-        
-        
-        
+            simulation = Simulation(numIterations, saveRate, strat, payoff, fileName)
+            nodes_list, adj_list = simulation(nodes, adj)
+            print(f'time used to simulate: {time.perf_counter()-start}s')
         
         # Step 3. run all measurements
         start = time.perf_counter()
@@ -130,7 +143,7 @@ if __name__ == '__main__':
         
         # Step 4. Visualize
         
-        start = time.perf_counter()
+        # start = time.perf_counter()
         
         visualize(nodes_list, adj_list, measures_list, community_detection_list, numIterations, "{0}+s{1}+p{2}".format(model, strat, payoff), pos_lock=True)
          # 4th parameter (model name) is for bookkeeping purposes
@@ -138,6 +151,6 @@ if __name__ == '__main__':
          # choose False to recalculate the position of Nodes every iteration (which significantly slows down the process)
         
         
-        print(f'time used to visualize: {time.perf_counter()-start}s \n')
+        # print(f'time used to visualize: {time.perf_counter()-start}s \n')
 
         # complexity_graph()
