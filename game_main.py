@@ -5,6 +5,7 @@ from analysis import *
 import matplotlib.pyplot as plt
 import numpy.polynomial.polynomial as poly
 import time
+import os 
 
 def complexity_graph():
         # timer
@@ -70,15 +71,15 @@ def complexity_graph():
         plt.close()
 
 
-def load_data(strat, payoff, saveRate):
+def load_data(fileName):
         start = time.perf_counter()
         
-        dir_path = os.path.dirname(os.path.realpath(__file__))
+        dir_path = os.path.dirname(os.path.realpath(__file__))   
         
-        fd = open(f'{dir_path}/savedInfo/adjMat_strategy{strat}payoff{payoff}saveRate{saveRate}.pickle', 'rb')
+        fd = open(f'{dir_path}/savedInfo/adjMat_{fileName}.pickle', 'rb')
         adj_list = pickle.load(fd)
 
-        fd = open(f'{dir_path}/savedInfo/nodesDict_strategy{strat}payoff{payoff}saveRate{saveRate}.pickle', 'rb')
+        fd = open(f'{dir_path}/savedInfo/nodesDict_{fileName}.pickle', 'rb')
         nodes_list = pickle.load(fd)
         
         numIterations = len(nodes_list)-1       # -1 since it included the initial, uniterated graph as well
@@ -91,6 +92,9 @@ def load_data(strat, payoff, saveRate):
 if __name__ == '__main__':
         start = time.perf_counter()
 
+
+# USER INPUT PROCESSING
+
         model = str(input("Model (default: ER): ") or "ER")
         strat = int(input("Strat # (default: 3): ") or "3")
 
@@ -100,21 +104,16 @@ if __name__ == '__main__':
         else:
             num_nodes = 200
             p = 0.1
-
-        k = 2
-        load_flag = int(input("Run(0) or Load(1) (default: 0): ") or "0")
         numIterations = int(input("Iteration # (default: 5): ",) or "5")
+            
+        k = 2
         payoff = 0 # int(input("Payoff # (default: 0): ") or "0")
         saveRate = 1
         m = 3
         
-        # Step 1. generate network
-        nodes, adj = generate_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
-        # nodes, adj = facebook_clean()
-        # nodes, adj = karate_clean()
         
-        
-        # Step 2. run simulation
+        ## generate filename
+                
         if model == 'ER':
             fileName = '{}_n={}_p={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, p, strat, payoff, saveRate, numIterations)
         elif model == 'WS':
@@ -123,11 +122,31 @@ if __name__ == '__main__':
             fileName = '{}_n={}_m={}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, num_nodes, m, strat, payoff, saveRate, numIterations)
         else:
             fileName = '{}_strat{}_payoff{}_saveRate{}_numIter{}'.format(model, strat, payoff, saveRate, numIterations)
+        
+        
+        dir_path = os.path.dirname(os.path.realpath(__file__))   
+        file_path = "{}/{}/{}{}{}".format(dir_path, "savedInfo", "adjMat_", fileName, ".pickle")
+        
+        load_flag = 0
+        if os.path.exists(file_path):
+                load_flag = int(input("File exists, would you like to load? (1-yes, 0-no, default: 1): ") or "1")
+                
+        
 
+# BEGIN SIMULATION
+
+        # Step 1. generate network
+        nodes, adj = generate_network(model, num_nodes, cooperator_proportion=0.5,  p = p, m =m, k =k, seed =100)
+        # nodes, adj = facebook_clean()
+        # nodes, adj = karate_clean()
+
+
+        # Step 2. run simulation
+        
         start = time.perf_counter()
         
         if load_flag:
-            nodes_list, adj_list, numIterations = load_data(strat, payoff, saveRate)              # Load pickles to save time
+            nodes_list, adj_list, numIterations = load_data(fileName)              # Load pickles to save time
         else:
             simulation = Simulation(numIterations, saveRate, strat, payoff, fileName)
             nodes_list, adj_list = simulation(nodes, adj)
