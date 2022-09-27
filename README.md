@@ -1,2 +1,2 @@
-# M168-simulation
-Simulations and network analysis for M168
+# Simulation Source Code
+Source code for paper: _Emergent Spatial Characteristics from Strategic Games Simulated on Random and Real Networks_
